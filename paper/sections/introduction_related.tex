@@ -1,0 +1,35 @@
+\section{Introduction}
+
+Offline reinforcement learning must make decisions from data collected by a fixed logging policy. Its central obstacle is coverage: a target policy may visit actions or trajectories absent from the log, leaving its value unidentified. Consequently, off-policy evaluation (OPE), pessimistic policy learning, and safe policy improvement usually require coverage of the target policy or constrain the learned policy near a covered baseline \citep{precup2000eligibility,thomas2015high,laroche2019safe,rashidinejad2021bridging,xie2021bellman}.
+
+Deployment, however, rarely requires two absolute policy values. The operational question is often whether a candidate improves on an existing baseline,
+\begin{equation}
+\DeltaV := V^\pi-V^{\pi_0}>0.
+\label{eq:contrast}
+\end{equation}
+The distinction matters. Suppose both policies take the same unsupported action with probability one half, but differ on two actions well covered by the logger. The reward of the unsupported action prevents identifying either value, yet it cancels exactly in their difference. Conventional separate-value analysis discards this cancellation and can remain vacuous even with infinite data.
+
+Pairwise OPE has previously exploited covariance to estimate value differences more efficiently under overlap \citep{jeunen2024delta}, and offline policy-comparison benchmarks evaluate confidence in pairwise queries \citep{koul2022offline}. Our question is more basic: \emph{what support is required to identify the comparison at all?} The answer cannot be expressed only through marginal state-action coverage. An unsupported excursion can leave and later re-enter an observed state, so cancellation must hold along complete policy paths.
+
+We introduce \emph{uniform contrastive coverage} (\UCC). For every state-action history, if its likelihood under the logger is zero, its likelihood must be identical under the candidate and baseline. The condition permits arbitrary common off-support behavior but forbids unmatched off-support path mass. We make four contributions.
+
+\begin{enumerate}
+    \item We prove that \UCC is necessary and sufficient for uniform nonparametric identification of $V^\pi-V^{\pi_0}$ over finite-horizon controlled processes with unrestricted bounded rewards. The proof yields a signed importance-weight representation and a two-step counterexample showing why local action agreement is insufficient.
+    \item We establish strict separation from individual coverage and identify an important boundary: when $\pi_0$ is the logging policy, \UCC collapses exactly to ordinary coverage of $\pi$.
+    \item For deterministic history trees, we derive a sharp partial-identification interval when \UCC fails. Its width equals the discounted total variation of the unmatched target-minus-baseline path mass on logger-null histories.
+    \item We turn identification into a deployment certificate using signed per-decision importance sampling and empirical-Bernstein concentration. We also derive the one-step semiparametric efficiency bound, separating the support question from avoidable estimator variance. Lightweight experiments verify the sharp formulas and show that joint contrastive analysis can be dramatically more informative than subtracting separate value bounds.
+\end{enumerate}
+
+Our goal is not a new deep-RL benchmark result. It is a theorem-driven account of when offline data can answer a policy-improvement query that standard OPE cannot answer policy by policy.
+
+\section{Related Work}
+
+\paragraph{Off-policy evaluation.}
+Importance sampling identifies a target value by reweighting logged trajectories under an overlap condition \citep{precup2000eligibility}. Doubly robust and model-assisted estimators reduce variance while retaining favorable bias properties \citep{jiang2016doubly,thomas2016data}. Marginalized density-ratio approaches avoid products of trajectory ratios and can achieve efficient rates under appropriate realizability conditions \citep{liu2018breaking,nachum2019dualdice,uehara2020minimax,kallus2020double}. These methods estimate one target value at a time and ordinarily require the target distribution to be dominated by the logger. Our signed representation instead asks whether the \emph{difference} of two target path measures is dominated.
+
+\paragraph{Pairwise comparison and safe improvement.}
+High-confidence OPE constructs lower bounds before deployment \citep{thomas2015high}. SPIBB constrains a candidate toward a data-collecting baseline in uncertain regions \citep{laroche2019safe}. Offline Policy Comparison with Confidence studies calibrated answers to pairwise state-policy queries \citep{koul2022offline}. Most closely, $\Delta$-OPE directly estimates value differences and exploits covariance between two policy estimators \citep{jeunen2024delta}. We complement this variance perspective with an identification result: shared unsupported mass may cancel, so pairwise evaluation can be possible even when both individual values are not.
+
+\paragraph{Beyond overlap and partial identification.}
+Partial identification reports the set of values compatible with observed data and maintained assumptions \citep{manski2003partial}. Recent OPE work bounds unsupported actions using smoothness \citep{khan2023beyond}; pessimistic policy learning weakens uniform overlap by requiring favorable coverage only where useful \citep{jin2022policy}. Incremental interventions and positivity-free policy classes modify the estimand or policy class to avoid unsupported interventions \citep{kennedy2019incremental,zhao2023positivity}. We keep the two policies fixed and exploit cancellation in their shared environment. Our tree bounds require only bounded rewards and are sharp without smooth extrapolation.
+

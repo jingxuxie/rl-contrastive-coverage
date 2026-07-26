@@ -1,0 +1,16 @@
+{
+  "bandit_exact_contrastive_width": 0.0,
+  "bandit_separate_width_q_0_4": 0.8000000000000002,
+  "bandit_true_difference": 0.19800000000000004,
+  "bandit_coverage_n_5000": 0.998,
+  "bandit_certification_n_5000": 1.0,
+  "sequential_true_difference": 0.5999999999999996,
+  "sequential_coverage_n_10000": 1.0,
+  "sequential_certification_n_10000": 1.0,
+  "tree_max_identity_error": 2.220446049250313e-16,
+  "random_bandit_max_identity_error": 1.8041124150158794e-16,
+  "random_bandit_median_width_ratio": 7.507169779490487,
+  "random_bandit_p90_width_ratio": 38.071008936665045,
+  "bandit_ips_efficiency_variance_ratio": 2.5625,
+  "bandit_empirical_mse_ratio_n_2000": 2.541126566799489
+}

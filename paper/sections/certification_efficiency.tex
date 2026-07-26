@@ -1,0 +1,79 @@
+\section{Finite-Sample Certification}
+
+Under \UCC, define the signed per-decision contribution for logged episode $i$,
+\begin{equation}
+Y_i=\sum_{t=1}^H\gamma^{t-1}
+W_t^\Delta(Z_{i,t})R_{i,t},
+\qquad
+\widehat\Delta=\frac1n\sum_{i=1}^nY_i.
+\end{equation}
+Unlike subtracting two independently bounded estimates, the subtraction occurs inside every episode and preserves covariance and support cancellation.
+
+Assume a deterministic range bound $\max Y_i-\min Y_i\le B$ and let $S_n^2$ be the sample variance. A two-sided empirical-Bernstein radius is
+\begin{equation}
+r_n(\delta)=
+\sqrt{\frac{2S_n^2\log(4/\delta)}{n}}
++\frac{7B\log(4/\delta)}{3(n-1)}.
+\label{eq:bernstein}
+\end{equation}
+
+\begin{proposition}[Deployment certificate]
+\label{prop:certificate}
+Under the assumptions of Theorem~\ref{thm:identification}, with probability at least $1-\delta$,
+$|\widehat\Delta-\DeltaV|\le r_n(\delta)$.
+Consequently, deploying $\pi$ only when
+$\widehat\Delta-r_n(\delta)>0$ has false-improvement probability at most $\delta$.
+When Theorem~\ref{thm:sharp} leaves a population ambiguity interval $[a,b]$ around the supported contrast, adding $[a,b]$ to the sampling interval remains valid.
+\end{proposition}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=.485\textwidth]{../results/figures/bandit_certificate.pdf}\hfill
+\includegraphics[width=.485\textwidth]{../results/figures/sequential_certificate.pdf}
+\caption{\textbf{Finite-sample certification.} Empirical coverage and probability that the lower confidence bound is positive. Dashed lines show nominal 95\% coverage.}
+\label{fig:certificate}
+\end{figure*}
+
+The leading term depends on
+$\operatorname{Var}_\beta(Y)$, a \emph{contrastive complexity}. Since
+$Y=Y^\pi-Y^{\pi_0}$,
+its variance contains the favorable term
+$-2\operatorname{Cov}(Y^\pi,Y^{\pi_0})$ emphasized by pairwise OPE \citep{jeunen2024delta}. Our identification result is orthogonal: $Y$ may be well-defined even when neither separate importance-weight estimator is.
+
+\section{Identification Is Not Yet Efficiency}
+
+Once the contrast is identified, signed IPS is the simplest unbiased estimator, but it need not be statistically efficient. The one-step case makes the distinction exact. Let $d_a=\pi(a)-\pi_0(a)$, $A\sim\beta$, $\mu_a=\bbE[R\mid A=a]$, and $\sigma_a^2=\operatorname{Var}(R\mid A=a)$. Under contrastive coverage, $d_a=0$ whenever $\beta_a=0$.
+
+\begin{proposition}[Bandit efficiency]
+\label{prop:efficiency}
+In the nonparametric finite-action bandit with known $\beta$, the efficient influence function for $\Delta=\sum_a d_a\mu_a$ is
+\begin{equation}
+\phi(A,R)=\frac{d_A}{\beta_A}(R-\mu_A),
+\end{equation}
+and the per-observation efficiency bound is
+\begin{equation}
+\mathcal V_{\rm eff}=\sum_{a:\beta_a>0}
+\frac{d_a^2\sigma_a^2}{\beta_a}.
+\label{eq:effbound}
+\end{equation}
+The stratified estimator $\widehat\Delta_{\rm strat}=\sum_a d_a\overline R_a$ attains this bound asymptotically. By contrast, signed IPS has variance
+\begin{align}
+\mathcal V_{\rm IPS}
+&=\sum_a\frac{d_a^2\bbE[R^2\mid a]}{\beta_a}-\Delta^2\\
+&=\mathcal V_{\rm eff}+
+\operatorname{Var}_{A\sim\beta}\!\left(\frac{d_A\mu_A}{\beta_A}\right)
+\ge \mathcal V_{\rm eff}.
+\label{eq:ipsdecomp}
+\end{align}
+\end{proposition}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=.485\textwidth]{../results/figures/random_bandit_width_ratio.pdf}\hfill
+\includegraphics[width=.485\textwidth]{../results/figures/bandit_efficiency.pdf}
+\caption{\textbf{Stress testing and efficiency.} (a) Joint identification is often much sharper than subtracting separate bounds. (b) After identification, stratification attains the bandit efficiency bound and improves over signed IPS.}
+\label{fig:stress}
+\end{figure*}
+
+Thus contrastive coverage solves an identification problem; standard augmentation or outcome regression can still remove avoidable action-composition noise. Equation~\eqref{eq:ipsdecomp} also suggests a sequential research program: combine signed path ratios with marginalized or doubly robust estimators \citep{jiang2016doubly,uehara2020minimax,kallus2020double}. We keep the finite-sample deployment guarantee on the transparent signed-PDIS estimator and use the bandit result to show that this choice is conservative rather than claimed optimal.
+

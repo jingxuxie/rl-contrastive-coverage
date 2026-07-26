@@ -1,0 +1,29 @@
+\section{Experiments}
+
+We test only theorem-predicted phenomena. All experiments are CPU-only, use exact tabular calculations or i.i.d. Monte Carlo sampling, and are reproducible from a fixed seed. No online returns are used for tuning.
+
+\paragraph{Three-action bandit.}
+The logger is $\beta=(.5,.5,0)$ and supported reward means are $(.8,.2)$. Candidate and baseline share unsupported mass $q$, perturbed by a mismatch $\epsilon$: their unsupported probabilities are $q+\epsilon/2$ and $q-\epsilon/2$. Figure~\ref{fig:population}a confirms that the sharp contrastive width is exactly $|\epsilon|$, independent of $q$. At $q=.4,\epsilon=0$, its width is zero while the separate-value interval has width $.8$. Across 5,000 random bandits, the maximum numerical error in the width identity is $1.8\times10^{-16}$; the median and 90th-percentile ratios of separate to contrastive width are $7.5$ and $38.1$.
+
+\paragraph{Sequential shared branch.}
+We use a five-step chain with a logger-supported Bernoulli controller and a common branch that the logger never enters. The target and baseline mix the common branch with different covered controllers. The sharp width is $|\epsilon|H$, where $\epsilon$ is the mismatch in common-component weight. Figure~\ref{fig:population}b verifies this identity with maximum error $4.4\times10^{-16}$. When $\epsilon=0$, the true improvement is $.6$ while separate population bounds are $[-1.4,2.6]$ and therefore cannot certify improvement even with infinite data.
+
+\paragraph{Random stress tests and estimator efficiency.}
+Figure~\ref{fig:stress}a plots the ratio of separate-value width to the sharp contrastive width in 5,000 random ten-action bandits. Large gains occur when common unsupported mass is large relative to its mismatch. Figure~\ref{fig:stress}b isolates estimation after identification. In the three-action example, the signed-IPS asymptotic variance is $.1786$, whereas the bound in Eq.~\eqref{eq:effbound} is $.0697$, a factor of $2.56$. The empirical $n\times$MSE curves converge to their predicted constants, and the stratified estimator removes the gap.
+
+\paragraph{Finite-sample certificates.}
+Figure~\ref{fig:certificate} reports empirical coverage and the probability of certifying the positive contrast over 1,000 bandit repetitions and 600 sequential repetitions. The empirical-Bernstein intervals are conservative: at $n=5{,}000$, bandit coverage is $.998$ and certification is $1.0$; at $n=10{,}000$, both sequential frequencies are $1.0$. The point is not that these toy tasks are difficult, but that sampling uncertainty shrinks while separate-value ambiguity does not.
+
+\section{Discussion and Limitations}
+
+Contrastive coverage changes the unit of analysis from a policy to an estimand. This is most useful when a third-party logger evaluates two policies that share modules or fallback behavior. It is not a loophole for direct improvement over the logger (Proposition~\ref{prop:logger}), nor does it extrapolate unmatched off-support effects.
+
+Our cleanest necessity theorem is uniform over a rich process class. In a narrower structural model, additional assumptions---smoothness, known dynamics, causal restrictions, or representation sharing---may identify contrasts beyond \UCC. Conversely, checking policy-path conditions can be computationally expensive in large or continuous spaces. Shared-controller decompositions offer a tractable sufficient condition, while scalable tests and learned signed density ratios are important next steps.
+
+The certificate assumes known logging propensities, independent episodes, bounded rewards, and policies fixed before seeing the certification split. Estimated propensities, data-dependent policy search, long-horizon variance reduction, and doubly robust signed estimators require additional analysis. These limitations are deliberate: isolating support cancellation first provides a precise foundation on which such estimators can be built.
+
+\section{Conclusion}
+
+Offline comparison does not always require offline evaluation of each policy. The exact support requirement is coverage of the signed target-baseline path difference. Uniform contrastive coverage is necessary and sufficient for robust nonparametric identification, sharp tree bounds quantify any remaining ambiguity, and signed confidence intervals turn the result into an abstaining deployment rule. The broader lesson is simple: before declaring an offline query impossible, analyze the support of the quantity being asked for.
+
+\clearpage

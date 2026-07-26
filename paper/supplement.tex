@@ -1,0 +1,47 @@
+\documentclass[letterpaper]{article}
+
+\newif\ifofficial
+\IfFileExists{aaai27.sty}{%
+  \officialtrue
+  \usepackage[submission]{aaai27}
+}{%
+  \officialfalse
+  \usepackage{aaai27draft}
+}
+\usepackage{times,helvet,courier}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs}
+\usepackage{natbib}
+\usepackage{microtype}
+\usepackage{xspace}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
+\newcommand{\bbE}{\mathbb{E}}
+\newcommand{\bbP}{\mathbb{P}}
+\newcommand{\UCC}{\textsc{UCC}\xspace}
+
+\title{Supplementary Material:\\Contrastive Coverage for Sequential Decision Making}
+\author{Anonymous submission}
+\affiliations{}
+
+\begin{document}
+\maketitle
+
+\input{supp_sections/formal_identification}
+\input{supp_sections/boundaries_audit}
+\input{supp_sections/partial_identification}
+\input{supp_sections/efficiency_certificate}
+\input{supp_sections/experimental_details}
+\ifofficial
+  \bibliography{references}
+\else
+  \bibliographystyle{plainnat}
+  \bibliography{references}
+\fi
+\end{document}

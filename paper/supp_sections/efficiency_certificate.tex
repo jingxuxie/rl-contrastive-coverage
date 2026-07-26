@@ -1,0 +1,52 @@
+\section{Bandit Efficiency Calculation}
+
+Let $d_a=\pi(a)-\pi_0(a)$ and suppose $d_a=0$ for every unsupported action. The observed-data score for a regular submodel perturbing only the conditional reward law at action $a$ has the usual mean-zero form. The pathwise derivative of $\Delta=\sum_a d_a\mu_a$ is represented by
+\[
+\phi(A,R)=\frac{d_A}{\beta_A}(R-\mu_A),
+\]
+because for every conditional score $s_a(R)$,
+\begin{align*}
+\bbE[\phi s]
+&=\sum_a\beta_a\frac{d_a}{\beta_a}
+\bbE[(R-\mu_a)s_a(R)\mid A=a]\\
+&=\sum_a d_a\,\dot\mu_a.
+\end{align*}
+Its variance is $\sum_a d_a^2\sigma_a^2/\beta_a$, giving the efficiency bound.
+
+For the stratified estimator, conditional on action counts $N_a$,
+$\overline R_a-\mu_a$ has variance $\sigma_a^2/N_a$. Since $N_a/n\to\beta_a$, the multivariate central limit theorem and Slutsky's theorem give
+\[
+\sqrt n(\widehat\Delta_{\rm strat}-\Delta)
+\Rightarrow
+N\!\left(0,\sum_a\frac{d_a^2\sigma_a^2}{\beta_a}\right).
+\]
+For signed IPS, one observation is $X=d_AR/\beta_A$. Therefore
+\[
+\operatorname{Var}(X)=
+\sum_a\frac{d_a^2\bbE[R^2\mid a]}{\beta_a}-\Delta^2.
+\]
+Using $\bbE[R^2\mid a]=\sigma_a^2+\mu_a^2$ and
+$\Delta=\bbE_\beta[d_A\mu_A/\beta_A]$ yields
+\[
+\operatorname{Var}(X)=\mathcal V_{\rm eff}+
+\operatorname{Var}_\beta(d_A\mu_A/\beta_A),
+\]
+which proves the decomposition and nonnegativity.
+
+\section{Finite-Sample Certificate}
+
+\begin{proposition}
+Let $Y_1,\ldots,Y_n$ be independent signed PDIS contributions with range at most $B$. Let $S_n^2$ be their sample variance. With probability at least $1-\delta$,
+\[
+\left|\frac1n\sum_{i=1}^nY_i-\bbE Y_i\right|
+\le
+\sqrt{\frac{2S_n^2\log(4/\delta)}{n}}
++\frac{7B\log(4/\delta)}{3(n-1)}.
+\]
+\end{proposition}
+\begin{proof}
+Apply the empirical-Bernstein inequality of \citet{maurer2009empirical} to $(Y_i-a)/B\in[0,1]$ for the upper tail and to $(b-Y_i)/B$ for the lower tail, each with failure probability $\delta/2$, and union bound.
+\end{proof}
+
+If the population identified set is $I+[a,b]$, replace $\bbE Y$ by the identified supported component and add $[a,b]$ to the confidence interval. On the event above, the resulting interval contains every data-compatible true contrast. A positive lower endpoint therefore certifies improvement with error probability at most $\delta$.
+

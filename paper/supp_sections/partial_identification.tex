@@ -1,0 +1,57 @@
+\section{Sharp Partial Identification on History Trees}
+
+Let $\mathcal Z_t^0=\{z_t:L_t^\beta(z_t)=0\}$ and
+$c_t(z_t)=\gamma^{t-1}(L_t^\pi-L_t^{\pi_0})(z_t)$. Reward means on supported prefixes are observed, while each unsupported mean is independently restricted to $[\ell_t(z_t),u_t(z_t)]$.
+
+\begin{theorem}[Restated]
+The sharp identified interval is
+\begin{align*}
+\underline\Delta&=I+\sum_{t,z_t\in\mathcal Z_t^0}
+\min\{c_t(z_t)\ell_t(z_t),c_t(z_t)u_t(z_t)\},\\
+\overline\Delta&=I+\sum_{t,z_t\in\mathcal Z_t^0}
+\max\{c_t(z_t)\ell_t(z_t),c_t(z_t)u_t(z_t)\}.
+\end{align*}
+Its width is
+\[
+\sum_{t,z_t\in\mathcal Z_t^0}|c_t(z_t)|
+\{u_t(z_t)-\ell_t(z_t)\}.
+\]
+\end{theorem}
+
+\begin{proof}
+The contrast is an affine function of the unsupported reward means:
+$\Delta=I+\sum c_t(z_t)m_t(z_t)$. The feasible set of reward means is a Cartesian product of intervals. A linear functional over a box is minimized coordinatewise by selecting $\ell_t$ when $c_t\ge0$ and $u_t$ when $c_t<0$, and maximized by the opposite choices. These assignments define valid reward kernels and attain both endpoints, proving sharpness. Subtracting endpoints yields the stated width.
+\end{proof}
+
+\begin{corollary}
+For common reward range $[0,1]$, the tree contrast is point identified if and only if \UCC holds.
+\end{corollary}
+
+\begin{corollary}[Bandit width and unbounded gain]
+Let $\mathcal U=\{a:\beta(a)=0\}$ and $d_a=\pi(a)-\pi_0(a)$.
+For rewards in $[0,1]$, the sharp contrastive width is
+$\sum_{a\in\mathcal U}|d_a|$.
+The sharp individual intervals for $V^\pi$ and $V^{\pi_0}$ have widths
+$\sum_{a\in\mathcal U}\pi(a)$ and
+$\sum_{a\in\mathcal U}\pi_0(a)$, respectively, so their Minkowski difference has width
+$\sum_{a\in\mathcal U}\{\pi(a)+\pi_0(a)\}$.
+The ratio is unbounded.
+\end{corollary}
+\begin{proof}
+Apply the sharp tree theorem at horizon one. For unboundedness, fix common unsupported probability $q>0$ and let the target and baseline probabilities on one unsupported action be $q+\epsilon/2$ and $q-\epsilon/2$. The separate width is $2q$, while the contrastive width is $|\epsilon|$; their ratio diverges as $\epsilon\to0$.
+\end{proof}
+
+\begin{corollary}[Maximal population certificate]
+A decision rule based only on the population logged law can certify $V^\pi>V^{\pi_0}$ uniformly over the history-tree model if and only if the sharp lower endpoint is positive.
+\end{corollary}
+\begin{proof}
+If $\underline\Delta>0$, every compatible reward kernel has positive contrast. If $\underline\Delta\le0$, sharpness supplies a compatible kernel attaining a nonpositive contrast while inducing the same logged law. Any rule certifying improvement from that law would therefore be unsound in this compatible environment.
+\end{proof}
+
+\section{Shared-Component Corollary}
+
+Let a policy select an episode-level latent controller before interaction. For every prefix,
+$L_t^\pi=qL_t^\kappa+(1-q)L_t^{\widetilde\pi}$ and
+$L_t^{\pi_0}=q_0L_t^\kappa+(1-q_0)L_t^{\widetilde\pi_0}$.
+If the distinct components place no mass on logger-null prefixes and $q=q_0$, then the target-baseline likelihood difference is zero there, so \UCC holds regardless of the logger's coverage of $\kappa$. If $q-q_0=\epsilon$, the common controller contributes $\epsilon V^\kappa$; with $V^\kappa\in[V_{\min},V_{\max}]$, its sharp ambiguity width is $|\epsilon|(V_{\max}-V_{\min})$.
+

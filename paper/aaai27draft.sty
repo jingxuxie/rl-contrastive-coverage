@@ -1,0 +1,48 @@
+% Draft-only fallback approximating the AAAI two-column layout.
+% Download the official AAAI-27 author kit and place aaai27.sty/aaai27.bst in
+% this directory before final submission. Do not submit using this fallback.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{aaai27draft}[2026/07/26 local draft fallback]
+\RequirePackage{times}
+\RequirePackage{helvet}
+\RequirePackage{courier}
+\setlength\topmargin{-0.25in}
+\setlength\oddsidemargin{-0.25in}
+\setlength\evensidemargin{-0.25in}
+\setlength\textheight{9.0in}
+\setlength\textwidth{7.0in}
+\setlength\columnsep{0.375in}
+\setlength\headheight{0pt}
+\setlength\headsep{0pt}
+\setlength\footskip{0pt}
+\pagestyle{empty}
+\flushbottom
+\twocolumn
+\sloppy
+\newlength\titlebox
+\setlength\titlebox{2.25in}
+\makeatletter
+\long\gdef\affiliations#1{\gdef\@affiliations{#1}}
+\gdef\@affiliations{}
+\renewcommand{\maketitle}{%
+  \par\begingroup
+  \twocolumn[\vbox to \titlebox{%
+    \vskip 0.45in
+    \centering{\LARGE\bfseries \@title\par}
+    \vskip 0.12in
+    {\Large\bfseries \@author\par}
+    \vskip 0.08in
+    {\normalsize \@affiliations\par}
+    \vfill}]
+  \endgroup
+  \setcounter{footnote}{0}}
+\renewenvironment{abstract}{\centerline{\bfseries Abstract}\vspace{0.5ex}\begin{quote}\small}{\par\end{quote}\vskip 1ex}
+\renewcommand\section{\@startsection{section}{1}{\z@}{-2.0ex plus -.5ex minus -.2ex}{3pt plus 2pt minus 1pt}{\Large\bfseries\centering}}
+\renewcommand\subsection{\@startsection{subsection}{2}{\z@}{-2.0ex plus -.5ex minus -.2ex}{3pt plus 2pt minus 1pt}{\large\bfseries\raggedright}}
+\renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}{-1.3ex plus -.4ex minus -.2ex}{.5ex plus .2ex}{\normalsize\bfseries\raggedright}}
+\setcounter{secnumdepth}{0}
+\makeatother
+\setlength\parindent{10pt}
+\setlength\parskip{0pt}
+\setlength\abovedisplayskip{7pt plus2pt minus5pt}
+\setlength\belowdisplayskip{7pt plus2pt minus5pt}
