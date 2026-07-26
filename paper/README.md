@@ -1,22 +1,30 @@
 # Paper build
 
-The manuscript is written for the AAAI-27 format.
+The manuscript is written for the official AAAI-27 LaTeX format.
 
-## Draft build
+## Build
 
 ```bash
 make paper
+make supplement
 ```
 
-The repository includes `aaai27draft.sty`, a local layout fallback used only so
-that the draft builds without downloading external files. It is **not** an
-official conference style and must not be used for submission.
+The repository already contains the unmodified official author kit under
+`../AAAI_AuthorKit27/`. The Makefile exposes that directory through `TEXINPUTS`
+and `BSTINPUTS`, so `main.tex` and `supplement.tex` automatically load
+`aaai2027.sty` and `aaai2027.bst`. Do not edit the official style or
+bibliography-style files.
 
-## Final submission build
+A local `aaai27draft.sty` fallback remains available only for environments in
+which the author-kit directory is absent. Output produced with that fallback is
+not a submission artifact.
 
-Download the official AAAI-27 author kit from the conference website and place
-`aaai27.sty` and `aaai27.bst` in this directory. Both `main.tex` and
-`supplement.tex` automatically use the official style when it is present.
+## Submission checks
+
+Before submission, compile from a clean checkout, verify the official page
+limit, include the conference reproducibility checklist when required, inspect
+all figure and table placement, and confirm that the PDF contains no Type 3
+fonts or unresolved citations.
 
 - `main.tex`: main paper
 - `supplement.tex`: full proofs and experimental details

@@ -1,25 +1,28 @@
 \documentclass[letterpaper]{article}
 
 \newif\ifofficial
-\IfFileExists{aaai27.sty}{%
+\IfFileExists{aaai2027.sty}{%
   \officialtrue
-  \usepackage[submission]{aaai27}
+  \usepackage[submission]{aaai2027}
 }{%
   \officialfalse
   \usepackage{aaai27draft}
 }
 
-\usepackage{times}
-\usepackage{helvet}
-\usepackage{courier}
+\usepackage[hyphens]{url}
 \usepackage{graphicx}
+\urlstyle{rm}
+\def\UrlFont{\rm}
+\usepackage{natbib}
+\usepackage{caption}
 \usepackage{booktabs}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{mathtools}
 \usepackage{microtype}
-\usepackage{natbib}
 \usepackage{xcolor}
 \usepackage{xspace}
+\frenchspacing
+\pdfinfo{/TemplateVersion (2027.1)}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{proposition}{Proposition}
