@@ -72,5 +72,4 @@ The relation $\eta\equiv_\beta\xi$ defined by
 $\Sigma_\beta(\eta)=\Sigma_\beta(\xi)$ is an equivalence relation, and a pair satisfies \UCC exactly when it lies in the same equivalence class. Consequently, a library of policies partitions into maximal classes whose every pairwise value difference is uniformly identified. All individually covered policies belong to the logger's zero-signature class, while policies can form other classes by sharing the same unsupported behavior.
 \end{proposition}
 
-On an explicit tree with $N$ prefix nodes, the signatures of $K$ policies can be propagated in one depth-first traversal in $O(KN)$ time and $O(KH)$ stack memory, then grouped by hashing. This avoids $O(K^2)$ pairwise support tests and produces an immediate audit: compare freely within a class; across classes, use the sharp unmatched-mass bounds or abstain.
-
+On an explicit tree with $N$ prefix nodes, the signatures of $K$ policies can be propagated jointly in $O(KN)$ time and materialized in $O(KN)$ storage, rather than testing all pairs in $O(K^2N)$ time. The resulting audit is immediate: compare freely within a class; across classes, use the sharp unmatched-mass bounds or abstain.

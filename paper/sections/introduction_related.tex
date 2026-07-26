@@ -16,7 +16,7 @@ We introduce \emph{uniform contrastive coverage} (\UCC). For every state-action 
 \begin{enumerate}
     \item We prove that \UCC is necessary and sufficient for uniform nonparametric identification of $V^\pi-V^{\pi_0}$ over finite-horizon controlled processes with unrestricted bounded rewards. The proof yields a signed importance-weight representation and a two-step counterexample showing why local action agreement is insufficient.
     \item We establish strict separation from individual coverage and identify an important boundary: when $\pi_0$ is the logging policy, \UCC collapses exactly to ordinary coverage of $\pi$.
-    \item For deterministic history trees, we derive a sharp partial-identification interval when \UCC fails. Its width equals the discounted total variation of the unmatched target-minus-baseline path mass on logger-null histories.
+    \item For deterministic history trees, we derive a sharp partial-identification interval when \UCC fails. Its width equals the discounted $\ell_1$ mass of the unmatched target-minus-baseline path measure on logger-null histories.
     \item We turn identification into a deployment certificate using signed per-decision importance sampling and empirical-Bernstein concentration. We also derive the one-step semiparametric efficiency bound, separating the support question from avoidable estimator variance. Lightweight experiments verify the sharp formulas and show that joint contrastive analysis can be dramatically more informative than subtracting separate value bounds.
 \end{enumerate}
 
@@ -32,4 +32,3 @@ High-confidence OPE constructs lower bounds before deployment \citep{thomas2015h
 
 \paragraph{Beyond overlap and partial identification.}
 Partial identification reports the set of values compatible with observed data and maintained assumptions \citep{manski2003partial}. Recent OPE work bounds unsupported actions using smoothness \citep{khan2023beyond}; pessimistic policy learning weakens uniform overlap by requiring favorable coverage only where useful \citep{jin2022policy}. Incremental interventions and positivity-free policy classes modify the estimand or policy class to avoid unsupported interventions \citep{kennedy2019incremental,zhao2023positivity}. We keep the two policies fixed and exploit cancellation in their shared environment. Our tree bounds require only bounded rewards and are sharp without smooth extrapolation.
-

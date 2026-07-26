@@ -27,11 +27,10 @@ Fix an ordering of all formal logger-null prefixes and define
 $\Sigma_\beta(\eta)$ to be the vector of $L_t^\eta(z_t)$ values on those prefixes.
 
 \begin{proposition}
-Equality of off-support signatures is an equivalence relation. Two policies satisfy \UCC if and only if their signatures agree. On an explicit history tree with $N$ nodes, signatures for $K$ policies can be computed jointly in $O(KN)$ time and $O(KH)$ depth-first-search stack memory.
+Equality of off-support signatures is an equivalence relation. Two policies satisfy \UCC if and only if their signatures agree. On an explicit history tree with $N$ nodes, signatures for $K$ policies can be computed jointly in $O(KN)$ time and stored in $O(KN)$ space.
 \end{proposition}
 \begin{proof}
-Reflexivity, symmetry, and transitivity follow from equality of vectors. The definition of signature equality is exactly the implication in \UCC on every logger-null prefix. For the complexity claim, visit each prefix once while carrying the logger likelihood and one likelihood for each policy. Updating all child likelihoods costs $O(K)$ per node; a depth-first traversal stores at most $H$ such vectors. Hashing the resulting signatures groups the policies without pairwise testing.
+Reflexivity, symmetry, and transitivity follow from equality of vectors. The definition of signature equality is exactly the implication in \UCC on every logger-null prefix. For the complexity claim, visit each prefix once while carrying the logger likelihood and one likelihood for each policy. Updating all child likelihoods costs $O(K)$ per node. Materializing the $K$ signature vectors uses $O(KN)$ storage, and grouping them avoids $O(K^2)$ pairwise tests.
 \end{proof}
 
 All policies individually covered by the logger have the zero signature and therefore lie in the logger's equivalence class. Nonzero classes capture policies that share identical unsupported path behavior. The implementation in \texttt{src/contrastive\_coverage/tree.py} exposes this audit through \texttt{off\_support\_signatures} and \texttt{contrastive\_equivalence\_classes}.
-
