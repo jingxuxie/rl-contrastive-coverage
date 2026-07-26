@@ -1,0 +1,36 @@
+\section{Why Local Agreement Is Insufficient}
+
+Consider horizon two. At the root, the logger always chooses action $0$; action $1$ enters an unsupported state. Let the candidate and baseline reach that state with probabilities $.6$ and $.4$, respectively. Suppose that once there both choose the same terminal action with probability one. Their local policies in the unsupported state are identical, but the terminal path likelihoods are $.6$ and $.4$. An arbitrary terminal reward contributes $.2r$ to the contrast and is not identified. Thus cancellation concerns cumulative path mass, not merely local action distributions.
+
+\section{Strictness and the Logger-Baseline Boundary}
+
+\begin{proposition}
+Individual path coverage of both $\pi$ and $\pi_0$ implies \UCC, but the converse fails.
+\end{proposition}
+\begin{proof}
+If $L_t^\beta(z_t)=0$, individual coverage implies both target likelihoods are zero, hence equal. Strictness follows from the three-action example
+$\beta=(.5,.5,0)$,
+$\pi=(.4,.1,.5)$,
+$\pi_0=(.1,.4,.5)$.
+\end{proof}
+
+\begin{proposition}
+When $\pi_0=\beta$, \UCC is equivalent to individual path coverage of $\pi$ by $\beta$.
+\end{proposition}
+\begin{proof}
+On every logger-null prefix, $L_t^{\pi_0}=L_t^\beta=0$. Therefore equality of the target and baseline likelihoods is exactly $L_t^\pi=0$.
+\end{proof}
+
+\section{Coverage Classes and Library Audit}
+
+Fix an ordering of all formal logger-null prefixes and define
+$\Sigma_\beta(\eta)$ to be the vector of $L_t^\eta(z_t)$ values on those prefixes.
+
+\begin{proposition}
+Equality of off-support signatures is an equivalence relation. Two policies satisfy \UCC if and only if their signatures agree. On an explicit history tree with $N$ nodes, signatures for $K$ policies can be computed jointly in $O(KN)$ time and stored in $O(KN)$ space.
+\end{proposition}
+\begin{proof}
+Reflexivity, symmetry, and transitivity follow from equality of vectors. The definition of signature equality is exactly the implication in \UCC on every logger-null prefix. For the complexity claim, visit each prefix once while carrying the logger likelihood and one likelihood for each policy. Updating all child likelihoods costs $O(K)$ per node. Materializing the $K$ signature vectors uses $O(KN)$ storage, and grouping them avoids $O(K^2)$ pairwise tests.
+\end{proof}
+
+All policies individually covered by the logger have the zero signature and therefore lie in the logger's equivalence class. Nonzero classes capture policies that share identical unsupported path behavior. The implementation in \texttt{src/contrastive\_coverage/tree.py} exposes this audit through \texttt{off\_support\_signatures} and \texttt{contrastive\_equivalence\_classes}.

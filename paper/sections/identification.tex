@@ -1,0 +1,44 @@
+\section{Identification Theory}
+
+Let $P_{M,t}^\eta$ denote the distribution of $z_t$ under policy $\eta$ in environment $M$. Whenever $L_t^\beta(z_t)>0$, define the signed weight
+\begin{equation}
+W_t^\Delta(z_t)=
+\frac{L_t^\pi(z_t)-L_t^{\pi_0}(z_t)}{L_t^\beta(z_t)}.
+\label{eq:signedweight}
+\end{equation}
+The following theorem is the central result.
+
+\begin{theorem}[Uniform identification]
+\label{thm:identification}
+Fix finite state and action alphabets, horizon $H$, policies $(\beta,\pi,\pi_0)$, and the class of all controlled processes with arbitrary transition kernels and rewards in $[0,1]$. The contrast $V_M^\pi-V_M^{\pi_0}$ is identified from the distribution of $\beta$-logged trajectories uniformly over this class if and only if \UCC holds. Under \UCC,
+\begin{equation}
+V_M^\pi-V_M^{\pi_0}
+=
+\bbE_M^\beta\!\left[
+\sum_{t=1}^H\gamma^{t-1}W_t^\Delta(Z_t)R_t
+\right].
+\label{eq:signedpdis}
+\end{equation}
+\end{theorem}
+
+\paragraph{Proof idea.}
+At any history, the trajectory-prefix density factors into a common environment term $g_{M,t}(z_t)$ and the policy likelihood $L_t^\eta(z_t)$. On logger-supported histories,
+\[
+dP_{M,t}^\pi-dP_{M,t}^{\pi_0}
+=W_t^\Delta\,dP_{M,t}^\beta.
+\]
+On logger-null policy paths, \UCC makes the signed target-baseline factor zero. Integrating the conditional reward gives Eq.~\eqref{eq:signedpdis}. Conversely, if Eq.~\eqref{eq:ucc} fails at $z_t$, construct a deterministic history-tree environment that reaches $z_t$ whenever its action sequence is chosen. Two environments assigning reward zero versus one only at $z_t$ generate the same logged distribution because $L_t^\beta(z_t)=0$, but their policy contrasts differ by $\gamma^{t-1}(L_t^\pi-L_t^{\pi_0})(z_t)$. Hence no functional of the logged law can identify the contrast. Full proofs appear in the supplement.
+
+\begin{corollary}[Shared unsupported controller]
+Suppose the candidate and baseline are episode-level mixtures
+$\pi=q\kappa+(1-q)\widetilde\pi$ and
+$\pi_0=q\kappa+(1-q)\widetilde\pi_0$, where the distinct components are logger-covered and the common controller $\kappa$ may be entirely unsupported. Then
+\[
+V^\pi-V^{\pi_0}=(1-q)(V^{\widetilde\pi}-V^{\widetilde\pi_0}),
+\]
+so the value of $\kappa$ is irrelevant to the comparison. If the common weights differ by $\epsilon$, its unknown contribution has sharp width $|\epsilon|(V_{\max}-V_{\min})$.
+\label{cor:mixture}
+\end{corollary}
+
+This construction is useful operationally: two candidate systems may share a fallback module, legacy controller, or escalation policy that was not exercised in the certification log. The comparison needs evidence only for their disagreement.
+

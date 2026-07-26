@@ -1,0 +1,54 @@
+\section{Sharp Bounds When Coverage Fails}
+
+Point identification is not the only useful output. When unmatched unsupported mass remains, a certifier should bound its effect and abstain if the sign cannot be determined.
+
+Consider a deterministic history tree in which the state at depth $t$ encodes the preceding action sequence. Let $\mathcal Z_t^0=\{z_t:L_t^\beta(z_t)=0\}$ and let $m_t(z_t)=\bbE[R_t\mid z_t]\in[\ell_t(z_t),u_t(z_t)]$. Reward means on logger-supported histories are identified. Define
+$c_t(z_t)=\gamma^{t-1}\{L_t^\pi(z_t)-L_t^{\pi_0}(z_t)\}$ and let $I$ be the sum of identified supported contributions.
+
+\begin{theorem}[Sharp tree identified set]
+\label{thm:sharp}
+In a deterministic history tree, the sharp identified set for $V^\pi-V^{\pi_0}$ is $[\underline\Delta,\overline\Delta]$, where
+\begin{align}
+\underline\Delta &= I+\sum_{t,z_t\in\mathcal Z_t^0}
+\min\{c_t(z_t)\ell_t(z_t),c_t(z_t)u_t(z_t)\},\\
+\overline\Delta &= I+\sum_{t,z_t\in\mathcal Z_t^0}
+\max\{c_t(z_t)\ell_t(z_t),c_t(z_t)u_t(z_t)\}.
+\end{align}
+Its width is exactly
+\begin{equation}
+\overline\Delta-\underline\Delta
+=\sum_{t,z_t\in\mathcal Z_t^0}
+|c_t(z_t)|\{u_t(z_t)-\ell_t(z_t)\}.
+\label{eq:width}
+\end{equation}
+For common bounds $[0,1]$, point identification holds if and only if \UCC holds.
+\end{theorem}
+
+The interval is sharp because each off-support reward kernel can independently select the endpoint favored by the sign of $c_t(z_t)$. In contrast, bounding $V^\pi$ and $V^{\pi_0}$ separately charges their common unsupported mass twice. Equation~\eqref{eq:width} charges only unmatched signed mass.
+
+\begin{corollary}[Bandit width and unbounded gain]
+\label{cor:banditwidth}
+In a finite-action bandit with rewards in $[0,1]$, let
+$\mathcal U=\{a:\beta(a)=0\}$ and $d_a=\pi(a)-\pi_0(a)$.
+The sharp contrastive interval has width
+$\sum_{a\in\mathcal U}|d_a|$, whereas subtracting the two sharp individual value intervals has width
+$\sum_{a\in\mathcal U}\{\pi(a)+\pi_0(a)\}$.
+Their ratio is unbounded: common unsupported mass can remain fixed while the mismatch tends to zero.
+\end{corollary}
+
+The natural decision rule is three-way:
+certify the candidate if $\underline\Delta>0$, reject it if $\overline\Delta<0$, and abstain otherwise. This separates irreducible ambiguity from sampling uncertainty.
+
+\begin{corollary}[Maximal population certificate]
+\label{cor:maximal}
+In the history-tree model, a rule based only on the population logged law can certify $V^\pi>V^{\pi_0}$ uniformly over all compatible reward kernels if and only if $\underline\Delta>0$. Thus abstention is unavoidable whenever the sharp interval contains a nonpositive contrast.
+\end{corollary}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=.485\textwidth]{../results/figures/bandit_identification_width.pdf}\hfill
+\includegraphics[width=.485\textwidth]{../results/figures/sequential_identification_width.pdf}
+\caption{\textbf{Population identification.} (a) In the bandit, contrastive width depends only on unmatched unsupported mass $|\epsilon|$, while separate bounds grow with common mass $q$. (b) The sequential shared-branch width is exactly $|\epsilon|H$; separate bounds stay wide at zero mismatch.}
+\label{fig:population}
+\end{figure*}
+

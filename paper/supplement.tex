@@ -1,0 +1,54 @@
+\documentclass[letterpaper]{article}
+
+\newif\ifofficial
+\IfFileExists{aaai2027.sty}{%
+  \officialtrue
+  \usepackage[submission]{aaai2027}
+}{%
+  \officialfalse
+  \usepackage{aaai27draft}
+}
+\usepackage[hyphens]{url}
+\usepackage{graphicx}
+\urlstyle{rm}
+\def\UrlFont{\rm}
+\usepackage{natbib}
+\usepackage{caption}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{xspace}
+\frenchspacing
+\pdfinfo{/TemplateVersion (2027.1)}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
+\newcommand{\bbE}{\mathbb{E}}
+\newcommand{\bbP}{\mathbb{P}}
+\newcommand{\UCC}{\textsc{UCC}\xspace}
+
+\title{Supplementary Material:\\Contrastive Coverage for Sequential Decision Making}
+\author{Anonymous submission}
+\affiliations{}
+
+\begin{document}
+\maketitle
+
+\input{supp_sections/formal_identification}
+\input{supp_sections/boundaries_audit}
+\input{supp_sections/partial_identification}
+\input{supp_sections/efficiency_certificate}
+\input{supp_sections/experimental_details}
+\ifofficial
+  \bibliography{references}
+\else
+  \bibliographystyle{plainnat}
+  \bibliography{references}
+\fi
+\end{document}

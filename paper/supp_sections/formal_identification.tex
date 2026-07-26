@@ -1,0 +1,60 @@
+\section{Formal Model}
+
+Let $\mathcal S$ and $\mathcal A$ be finite. A length-$H$ controlled process $M$ consists of an initial law $\rho(s_1)$, transition kernels $P_t(s_{t+1}\mid z_t)$, and reward kernels $Q_t(r_t\mid z_t)$ supported on $[0,1]$. We allow full history dependence; Markov decision processes are a special case. For
+$z_t=(s_1,a_1,\ldots,s_t,a_t)$ and $h_t=(s_1,a_1,\ldots,a_{t-1},s_t)$, define
+\[
+L_t^\eta(z_t)=\prod_{j=1}^t\eta_j(a_j\mid h_j)
+\]
+and the environment prefix factor
+\[
+g_{M,t}(z_t)=\rho(s_1)\prod_{j=1}^{t-1}P_j(s_{j+1}\mid z_j).
+\]
+Thus the state-action prefix mass is
+$p_{M,t}^\eta(z_t)=g_{M,t}(z_t)L_t^\eta(z_t)$.
+Let $m_{M,t}(z_t)=\bbE_M[R_t\mid z_t]$.
+
+The logged distribution contains complete episodes under $\beta$. Two environments are observationally equivalent when they induce the same distribution of states, actions, and rewards under $\beta$. A contrast is uniformly identified when it has the same value in every pair of observationally equivalent environments in the model class.
+
+\section{Proof of the Uniform Identification Theorem}
+
+\begin{theorem}[Restated]
+For fixed finite alphabets and policies $(\beta,\pi,\pi_0)$, the contrast $V_M^\pi-V_M^{\pi_0}$ is uniformly identified over all finite-horizon controlled processes with rewards in $[0,1]$ if and only if, for every formal prefix $z_t$,
+\[
+L_t^\beta(z_t)=0\Longrightarrow L_t^\pi(z_t)=L_t^{\pi_0}(z_t).
+\]
+When the condition holds,
+\[
+V_M^\pi-V_M^{\pi_0}
+=\bbE_M^\beta\left[\sum_{t=1}^H\gamma^{t-1}
+\frac{L_t^\pi(Z_t)-L_t^{\pi_0}(Z_t)}{L_t^\beta(Z_t)}R_t\right],
+\]
+where the ratio is evaluated only on logged prefixes.
+\end{theorem}
+
+\begin{proof}[Sufficiency]
+For each $t$,
+\begin{align*}
+&\bbE_M^\pi[R_t]-\bbE_M^{\pi_0}[R_t]\\
+&\quad=\sum_{z_t}g_{M,t}(z_t)
+\{L_t^\pi(z_t)-L_t^{\pi_0}(z_t)\}m_{M,t}(z_t).
+\end{align*}
+Partition the sum according to whether $L_t^\beta(z_t)$ is positive. On the zero-likelihood set, the braced difference is zero by \UCC. On the positive-likelihood set, multiply and divide by $L_t^\beta(z_t)$:
+\begin{align*}
+&\sum_{z_t:L_t^\beta>0}g_{M,t}(z_t)L_t^\beta(z_t)
+\frac{L_t^\pi(z_t)-L_t^{\pi_0}(z_t)}{L_t^\beta(z_t)}m_{M,t}(z_t)\\
+&=\bbE_M^\beta[W_t^\Delta(Z_t)R_t].
+\end{align*}
+Summing with discount factors proves the representation. Its right-hand side is a functional of the logged law and known policies, so the contrast is identified.
+\end{proof}
+
+\begin{proof}[Necessity]
+Suppose \UCC fails. Then for some $t$ and formal prefix
+$z_t^\star=(s_1^\star,a_1^\star,\ldots,s_t^\star,a_t^\star)$,
+$L_t^\beta(z_t^\star)=0$ but
+$d^\star:=L_t^\pi(z_t^\star)-L_t^{\pi_0}(z_t^\star)\ne0$.
+Construct a deterministic history-tree process whose state at depth $j$ records the preceding action sequence and whose deterministic transitions make $z_t^\star$ feasible when its action sequence is selected. All rewards are zero except possibly at $z_t^\star$. Let $M_0$ set its reward to zero and $M_1$ set it to one.
+
+Because the logger assigns zero probability to the action prefix, it never observes $z_t^\star$. Hence $M_0$ and $M_1$ induce exactly the same logged trajectory distribution. Their contrasts differ by
+$\gamma^{t-1}d^\star\ne0$. Therefore the contrast is not a functional of the logged law and is not uniformly identified.
+\end{proof}
+

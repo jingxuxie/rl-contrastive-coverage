@@ -1,0 +1,4 @@
+\section{Experimental Details}
+
+All scripts are in \texttt{experiments/run\_all.py}; the seed is 20260726. Bandit population experiments vary common unsupported mass $q\in\{.1,.25,.4,.55,.7\}$ and mismatch $\epsilon$. The finite-sample experiment uses $q=.45$, true contrast $.198$, 1,000 repetitions, and sample sizes from 100 to 5,000. The sequential chain has horizon five, supported per-step reward means $.75$ and $.25$, logger good-action probability $.5$, target/baseline good-action probabilities $.7/.3$, common weight $.4$, and true contrast $.6$. It uses 600 repetitions per sample size. A deterministic binary tree verifies the exact width identity over mismatches from zero to $.2$. Finally, 5,000 randomly generated finite-action bandits stress-test the one-step identity.
+
