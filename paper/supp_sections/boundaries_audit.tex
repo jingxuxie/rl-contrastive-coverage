@@ -34,3 +34,25 @@ Reflexivity, symmetry, and transitivity follow from equality of vectors. The def
 \end{proof}
 
 All policies individually covered by the logger have the zero signature and therefore lie in the logger's equivalence class. Nonzero classes capture policies that share identical unsupported path behavior. The implementation in \texttt{src/contrastive\_coverage/tree.py} exposes this audit through \texttt{off\_support\_signatures} and \texttt{contrastive\_equivalence\_classes}.
+
+
+\section{Positioning by Estimand and Support Requirement}
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4.2pt}
+\begin{tabular}{@{}p{1.15in}p{1.15in}p{2.05in}p{2.05in}@{}}
+\toprule
+Line of work & Primary estimand & Treatment of support failure & Distinction here \\
+\midrule
+Standard / efficient OPE & $V^\pi$ & Requires target domination or structural extrapolation & Estimates signed continuation directly \\
+$\Delta$-OPE / pairwise OPE & $V^\pi-V^{\pi_0}$ & Uses covariance under conventional overlap & Allows exact common off-support cancellation \\
+Safe improvement / selection & Improvement or best candidate & Constrains policies, pessimizes, or corrects search & Separates structural audit from statistical search \\
+Partial identification & Value set & Bounds unsupported effects using maintained assumptions & Sharp width equals unmatched signed path mass \\
+This work & Fixed pair and fixed library & Signed prefix domination; otherwise sharp abstention & Necessary/sufficient support plus efficient certificates \\
+\bottomrule
+\end{tabular}
+\caption{Neighboring lines of work differ both in estimand and in how they handle support failure. Contrastive coverage changes the support requirement because the estimand is a signed difference, not because unsupported outcomes are extrapolated.}
+\label{tab:supprelated}
+\end{table*}

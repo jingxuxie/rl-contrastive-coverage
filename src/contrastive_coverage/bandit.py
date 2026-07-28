@@ -207,6 +207,87 @@ def signed_ips_samples(
     return (pi[actions] - pi0[actions]) * rewards / beta[actions]
 
 
+def augmented_difference_samples(
+    actions: np.ndarray,
+    rewards: np.ndarray,
+    behavior: Iterable[float],
+    target: Iterable[float],
+    baseline: Iterable[float],
+    reward_model: Iterable[float],
+) -> np.ndarray:
+    """Contrastive augmented-IPS contributions for a finite-action bandit.
+
+    ``reward_model`` may be any vector in ``[0, 1]`` fitted independently of
+    the evaluation sample.  Conditional on that fitted vector, the returned
+    contributions have expectation ``V(target)-V(baseline)`` whenever the
+    target-baseline contrast vanishes on behavior-null actions.  The model
+    therefore changes variance but not expectation.
+    """
+
+    beta = _as_probability_vector(behavior, "behavior")
+    pi = _as_probability_vector(target, "target")
+    pi0 = _as_probability_vector(baseline, "baseline")
+    mu_hat = np.asarray(reward_model, dtype=float)
+    actions = np.asarray(actions, dtype=int)
+    rewards = np.asarray(rewards, dtype=float)
+    if not (beta.shape == pi.shape == pi0.shape == mu_hat.shape):
+        raise ValueError("behavior, policies, and reward_model must align")
+    if actions.shape != rewards.shape:
+        raise ValueError("actions and rewards must have the same shape")
+    if np.any((mu_hat < 0.0) | (mu_hat > 1.0)):
+        raise ValueError("reward_model must lie in [0, 1]")
+    if np.any(beta[actions] <= 0.0):
+        raise ValueError("observed action has zero behavior probability")
+
+    d = pi - pi0
+    unsupported = beta <= 0.0
+    if np.any(np.abs(d[unsupported]) > 1e-12):
+        raise ValueError("augmented estimator requires contrastive coverage")
+    model_value = float(np.dot(d, mu_hat))
+    return model_value + d[actions] * (rewards - mu_hat[actions]) / beta[actions]
+
+
+def augmented_difference_range(
+    behavior: Iterable[float],
+    target: Iterable[float],
+    baseline: Iterable[float],
+    reward_model: Iterable[float],
+    *,
+    support_tol: float = 1e-12,
+) -> float:
+    """Exact deterministic range of bandit augmented contributions.
+
+    Rewards are assumed to lie in ``[0, 1]``.  The range is computed by
+    enumerating the two reward endpoints for every behavior-supported action.
+    It is conditional on the fitted reward model and is therefore suitable for
+    sample-split empirical-Bernstein certification.
+    """
+
+    beta = _as_probability_vector(behavior, "behavior")
+    pi = _as_probability_vector(target, "target")
+    pi0 = _as_probability_vector(baseline, "baseline")
+    mu_hat = np.asarray(reward_model, dtype=float)
+    if not (beta.shape == pi.shape == pi0.shape == mu_hat.shape):
+        raise ValueError("behavior, policies, and reward_model must align")
+    if np.any((mu_hat < 0.0) | (mu_hat > 1.0)):
+        raise ValueError("reward_model must lie in [0, 1]")
+
+    d = pi - pi0
+    supported = beta > support_tol
+    if np.any(np.abs(d[~supported]) > support_tol):
+        raise ValueError("augmented estimator requires contrastive coverage")
+    if not np.any(supported):
+        return 0.0
+
+    model_value = float(np.dot(d, mu_hat))
+    weight = d[supported] / beta[supported]
+    low_reward = model_value - weight * mu_hat[supported]
+    high_reward = model_value + weight * (1.0 - mu_hat[supported])
+    lower = float(min(low_reward.min(), high_reward.min()))
+    upper = float(max(low_reward.max(), high_reward.max()))
+    return upper - lower
+
+
 def empirical_bernstein_radius(
     samples: Iterable[float],
     *,

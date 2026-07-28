@@ -1,52 +1,263 @@
-\section{Bandit Efficiency Calculation}
+\section{Contrastive Bellman Recursion}
 
-Let $d_a=\pi(a)-\pi_0(a)$ and suppose $d_a=0$ for every unsupported action. The observed-data score for a regular submodel perturbing only the conditional reward law at action $a$ has the usual mean-zero form. The pathwise derivative of $\Delta=\sum_a d_a\mu_a$ is represented by
+Let
+$\omega_t(Z_t)=\{L_t^\pi(Z_t)-L_t^{\pi_0}(Z_t)\}/L_t^\beta(Z_t)$
+on logger-supported paths, and set $v_{H+1}^\Delta=0$. Under \UCC, define recursively
+\begin{align}
+q_t^\Delta(Z_t)
+&=\bbE_\beta[\omega_tR_t+\gamma v_{t+1}^\Delta(H_{t+1})\mid Z_t],
+\label{eq:suppq}\\
+v_t^\Delta(H_t)
+&=\bbE_\beta[q_t^\Delta(Z_t)\mid H_t].
+\label{eq:suppv}
+\end{align}
+The second expectation integrates only the known logging action $A_t\sim\beta_t(\cdot\mid H_t)$.
+
+\begin{lemma}[Contrastive recursion identity]
+\label{lem:recursion}
+$\bbE_\beta[v_1^\Delta(H_1)]=V^\pi-V^{\pi_0}$.
+\end{lemma}
+\begin{proof}
+By iterated expectation,
 \[
-\phi(A,R)=\frac{d_A}{\beta_A}(R-\mu_A),
+\bbE_\beta v_t^\Delta
+=\bbE_\beta[\omega_tR_t]+\gamma\bbE_\beta v_{t+1}^\Delta.
 \]
-because for every conditional score $s_a(R)$,
+Recursing to the terminal value and applying the signed-PDIS representation gives
+\[
+\bbE_\beta v_1^\Delta
+=\sum_{t=1}^H\gamma^{t-1}\bbE_\beta[\omega_tR_t]
+=V^\pi-V^{\pi_0}.
+\]
+\end{proof}
+
+Let $\widetilde q_t$ be arbitrary square-integrable functions on logger-supported action histories, set
+$\widetilde v_t(H_t)=\bbE_{A_t\sim\beta_t}[\widetilde q_t(H_t,A_t)\mid H_t]$,
+and $\widetilde v_{H+1}=0$. Define
+\[
+\begin{aligned}
+Y_{\rm CA}(\widetilde q)
+&=\widetilde v_1(H_1)+\sum_{t=1}^H\gamma^{t-1}\bigl\{\omega_tR_t\\
+&\qquad+\gamma\widetilde v_{t+1}(H_{t+1})-\widetilde q_t(Z_t)\bigr\}.
+\end{aligned}
+\]
+
+\begin{proposition}[Exact model robustness]
+\label{prop:modelrobust}
+For every fixed $\widetilde q$,
+$\bbE_\beta Y_{\rm CA}(\widetilde q)=V^\pi-V^{\pi_0}$.
+The conclusion therefore holds conditionally when $\widetilde q$ is fitted on an independent training sample.
+\end{proposition}
+\begin{proof}
+Because $\bbE\widetilde q_t=\bbE\widetilde v_t$,
 \begin{align*}
-\bbE[\phi s]
-&=\sum_a\beta_a\frac{d_a}{\beta_a}
-\bbE[(R-\mu_a)s_a(R)\mid A=a]\\
-&=\sum_a d_a\,\dot\mu_a.
+\bbE Y_{\rm CA}(\widetilde q)
+&=\sum_{t=1}^H\gamma^{t-1}\bbE[\omega_tR_t]
++\bbE\widetilde v_1\\
+&\quad+\sum_{t=1}^H\gamma^t\bbE\widetilde v_{t+1}
+-\sum_{t=1}^H\gamma^{t-1}\bbE\widetilde v_t\\
+&=\sum_{t=1}^H\gamma^{t-1}\bbE[\omega_tR_t],
 \end{align*}
-Its variance is $\sum_a d_a^2\sigma_a^2/\beta_a$, giving the efficiency bound.
+where all augmentation terms telescope and $\widetilde v_{H+1}=0$. The final expression equals the contrast by the signed-PDIS identification formula.
+\end{proof}
 
-For the stratified estimator, conditional on action counts $N_a$,
-$\overline R_a-\mu_a$ has variance $\sigma_a^2/N_a$. Since $N_a/n\to\beta_a$, the multivariate central limit theorem and Slutsky's theorem give
+This is stronger than ordinary consistency of an outcome model: with the true logging mechanism, a misspecified continuation affects variance but not expectation. The known-logger action average in $\widetilde v_t$ is essential.
+
+\section{Efficient Influence Function and Exact Variance}
+
+For the efficiency argument, let $\mathcal F_t^-$ be the full observed information immediately before $A_t$, $\mathcal F_t^A=\mathcal F_t^-\vee\sigma(A_t)$, and $\mathcal F_t^+$ the information after observing $(R_t,S_{t+1})$. Although the policies and kernels are indexed by the state-action history, these filtrations also contain past rewards. Define
+\begin{align*}
+D_0&=v_1^\Delta(H_1)-\Delta,\\
+D_t^K&=\gamma^{t-1}
+\{\omega_tR_t+\gamma v_{t+1}^\Delta(H_{t+1})-q_t^\Delta(Z_t)\},\\
+D_t^A&=\gamma^{t-1}\{q_t^\Delta(Z_t)-v_t^\Delta(H_t)\}.
+\end{align*}
+Then $\bbE[D_t^K\mid\mathcal F_t^A]=0$ and
+$\bbE[D_t^A\mid\mathcal F_t^-]=0$.
+
+\begin{theorem}[Efficient influence function]
+\label{thm:suppeff}
+In the nonparametric sequential model with known logging mechanism, the canonical gradient for $\Delta=V^\pi-V^{\pi_0}$ under \UCC is
+\begin{equation}
+\phi_{\rm eff}=D_0+\sum_{t=1}^H D_t^K
+=Y_{\rm CA}(q^\Delta)-\Delta.
+\label{eq:eif}
+\end{equation}
+Consequently, every regular asymptotically linear estimator has asymptotic variance at least
+$\mathcal V_{\rm eff}=\bbE_\beta[\phi_{\rm eff}^2]$.
+\end{theorem}
+
+\begin{proof}
+The observed law factors into the initial-state law, the known action mechanisms $\beta_t$, and unrestricted joint reward--next-state kernels. Its tangent space is the closed linear span of an initial-state score and outcome-kernel scores with conditional mean zero given $Z_t$.
+
+Since the identified parameter is $\Delta=\bbE_\beta Y_{\rm PDIS}$ for a fixed observed-data function, $Y_{\rm PDIS}-\Delta$ is an influence function. Direct telescoping gives the sample identity
+\begin{equation}
+Y_{\rm PDIS}-\Delta
+=D_0+\sum_{t=1}^H D_t^K+
+\sum_{t=1}^H D_t^A.
+\label{eq:orthdecomp}
+\end{equation}
+The first term belongs to the initial-state score space. Each $D_t^K$ has conditional mean zero given $Z_t$ and belongs to the $t$th outcome-kernel score space. Therefore the first two terms on the right of Eq.~\eqref{eq:orthdecomp} lie in the tangent space.
+
+Each $D_t^A$ is centered over the known action draw. It is orthogonal to the initial score and every earlier outcome score by conditioning on $\mathcal F_t^-$, and orthogonal to the current and later outcome scores by conditioning on their post-action histories. Thus $\sum_tD_t^A$ lies in the tangent-space orthocomplement. Equation~\eqref{eq:eif} is therefore the orthogonal projection of an influence function onto the tangent space, hence the canonical gradient. The lower bound follows from standard semiparametric efficiency theory \citep{bickel1993efficient}.
+\end{proof}
+
+The same alternating-filtration argument shows that $D_t^A$ are mutually orthogonal across $t$ and orthogonal to $\phi_{\rm eff}$. This yields an exact population variance identity, not merely an asymptotic comparison.
+
+\begin{theorem}[Nuisance and action-noise decomposition]
+\label{thm:suppvariance}
+Let
+$\delta q_t=\widetilde q_t-q_t^\Delta$ and
+$\delta v_t=\widetilde v_t-v_t^\Delta$. Then
+\begin{equation}
+\operatorname{Var}\{Y_{\rm CA}(\widetilde q)\}
+=\mathcal V_{\rm eff}+
+\sum_{t=1}^H\gamma^{2(t-1)}
+\bbE[(\delta q_t-\delta v_t)^2].
+\label{eq:suppgeneralvar}
+\end{equation}
+In particular,
+\begin{equation}
+\operatorname{Var}(Y_{\rm PDIS})
+=\mathcal V_{\rm eff}+
+\sum_{t=1}^H\gamma^{2(t-1)}
+\bbE[(q_t^\Delta-v_t^\Delta)^2].
+\label{eq:supppdisvar}
+\end{equation}
+\end{theorem}
+\begin{proof}
+Subtracting the oracle contribution from the fitted one gives
 \[
-\sqrt n(\widehat\Delta_{\rm strat}-\Delta)
-\Rightarrow
-N\!\left(0,\sum_a\frac{d_a^2\sigma_a^2}{\beta_a}\right).
+Y_{\rm CA}(\widetilde q)-Y_{\rm CA}(q^\Delta)
+=-\sum_{t=1}^H\gamma^{t-1}(\delta q_t-\delta v_t).
 \]
-For signed IPS, one observation is $X=d_AR/\beta_A$. Therefore
+Each parenthesized term is a mean-zero action-mechanism increment conditional on $\mathcal F_t^-$. These increments are mutually orthogonal and orthogonal to the efficient influence function by the same conditioning argument used above. Taking variances proves Eq.~\eqref{eq:suppgeneralvar}. Setting $\widetilde q_t=\widetilde v_t=0$ gives Eq.~\eqref{eq:supppdisvar}.
+\end{proof}
+
+Equation~\eqref{eq:suppgeneralvar} shows that oracle contrastive augmentation is not only efficient but also the unique variance minimizer up to action-centered equivalence: only the component of continuation error that varies across the logger's actions incurs excess variance. A sample-split plug-in estimator is exactly unbiased at every sample size. The following corollary formalizes the corresponding cross-fitted limit.
+
+\begin{corollary}[Cross-fitted efficiency]
+\label{cor:crossfiteff}
+Partition $n$ independent episodes into a fixed number $K$ of folds whose proportions are bounded away from zero. For fold $k$, fit $\widetilde q^{(-k)}$ using only the other folds and evaluate $Y_{\rm CA}(\widetilde q^{(-k)})$ on fold $k$. Let
 \[
-\operatorname{Var}(X)=
-\sum_a\frac{d_a^2\bbE[R^2\mid a]}{\beta_a}-\Delta^2.
+\mathcal E_{n,k}=\sum_{t=1}^H\gamma^{2(t-1)}
+\bbE_\beta[(\delta q_{t,k}-\delta v_{t,k})^2\mid\mathcal D_{-k}].
 \]
-Using $\bbE[R^2\mid a]=\sigma_a^2+\mu_a^2$ and
-$\Delta=\bbE_\beta[d_A\mu_A/\beta_A]$ yields
+If $\max_{k\le K}\mathcal E_{n,k}=o_p(1)$ and
+$\phi_{\rm eff}$ has finite variance, then the cross-fitted average satisfies
 \[
-\operatorname{Var}(X)=\mathcal V_{\rm eff}+
-\operatorname{Var}_\beta(d_A\mu_A/\beta_A),
+\sqrt n(\widehat\Delta_{\rm CA}-\Delta)
+\Rightarrow N(0,\mathcal V_{\rm eff}).
 \]
-which proves the decomposition and nonnegativity.
+No product-rate condition is required.
+\end{corollary}
+\begin{proof}
+Let $\widehat\Delta_{\rm or}=n^{-1}\sum_iY_{{\rm CA},i}(q^\Delta)$. On evaluation fold $k$, the difference between the fitted and oracle contributions is
+$-\sum_t\gamma^{t-1}(\delta q_{t,k}-\delta v_{t,k})$.
+Conditional on $\mathcal D_{-k}$, this difference has mean zero by the known-logger action centering and variance $\mathcal E_{n,k}$ by Theorem~\ref{thm:suppvariance}. Conditional Chebyshev therefore gives
+$\sqrt n(\widehat\Delta_{\rm CA}-\widehat\Delta_{\rm or})=o_p(1)$ after summing the fixed number of folds. The ordinary central limit theorem applied to the oracle influence-function average and Slutsky's theorem complete the proof.
+\end{proof}
+
+\section{Relation to Standard Doubly Robust OPE}
+
+Suppose temporarily that each policy is individually covered. Let
+$W_t^\eta=L_t^\eta/L_t^\beta$, and define ordinary target-policy continuations
+\begin{align*}
+Q_t^\eta(z_t)&=\bbE_M^\eta[R_t+\gamma V_{t+1}^\eta(H_{t+1})\mid Z_t=z_t],\\
+V_t^\eta(h_t)&=\bbE_{A_t\sim\eta_t}[Q_t^\eta(h_t,A_t)].
+\end{align*}
+Backward induction gives
+\begin{align*}
+q_t^\Delta&=W_t^\pi Q_t^\pi-W_t^{\pi_0}Q_t^{\pi_0},\\
+v_t^\Delta&=W_{t-1}^\pi V_t^\pi-W_{t-1}^{\pi_0}V_t^{\pi_0},
+\end{align*}
+with $W_0^\eta=1$. Hence the oracle CA-PDIS contribution equals the difference of the usual sequential doubly robust contributions \citep{jiang2016doubly,thomas2016data}. Under \UCC alone, the two terms on the right may not exist separately, while their directly defined contrastive continuation does. This is the estimator-level counterpart of the identification theorem.
+
+At horizon one, $q_1^\Delta(a)=d_a\mu_a/\beta_a$ and $v_1^\Delta=\Delta$, where $d_a=\pi(a)-\pi_0(a)$. Equation~\eqref{eq:eif} reduces to
+\[
+\phi_{\rm eff}(A,R)=\frac{d_A}{\beta_A}(R-\mu_A),
+\]
+with efficiency bound
+$\sum_{a:\beta_a>0}d_a^2\sigma_a^2/\beta_a$.
+The within-action plug-in estimator $\sum_a d_a\overline R_a$ attains the bound, while signed IPS adds
+$\operatorname{Var}_\beta(d_A\mu_A/\beta_A)$, recovering the bandit calculation as a corollary.
 
 \section{Finite-Sample Certificate}
 
 \begin{proposition}
-Let $Y_1,\ldots,Y_n$ be independent signed PDIS contributions with range at most $B$. Let $S_n^2$ be their sample variance. With probability at least $1-\delta$,
+Let $Y_1,\ldots,Y_n$ be independent unbiased contrast contributions with deterministic range at most $B$. Let $S_n^2$ be their sample variance. With probability at least $1-\delta$,
 \[
-\left|\frac1n\sum_{i=1}^nY_i-\bbE Y_i\right|
+\left|\frac1n\sum_{i=1}^nY_i-\Delta\right|
 \le
 \sqrt{\frac{2S_n^2\log(4/\delta)}{n}}
 +\frac{7B\log(4/\delta)}{3(n-1)}.
 \]
 \end{proposition}
 \begin{proof}
-Apply the empirical-Bernstein inequality of \citet{maurer2009empirical} to $(Y_i-a)/B\in[0,1]$ for the upper tail and to $(b-Y_i)/B$ for the lower tail, each with failure probability $\delta/2$, and union bound.
+Apply the empirical-Bernstein inequality of \citet{maurer2009empirical} to an affine rescaling of $Y_i$ into $[0,1]$ for the upper and lower tails, each with failure probability $\delta/2$, and union bound.
 \end{proof}
 
-If the population identified set is $I+[a,b]$, replace $\bbE Y$ by the identified supported component and add $[a,b]$ to the confidence interval. On the event above, the resulting interval contains every data-compatible true contrast. A positive lower endpoint therefore certifies improvement with error probability at most $\delta$.
+For signed PDIS the $Y_i$ are directly independent. For split-fitted CA-PDIS, condition on the nuisance-training sample: the evaluation contributions are then independent, unbiased by Proposition~\ref{prop:modelrobust}, and bounded by a range computable from the fitted functions and known policy ratios. The conditional guarantee integrates to the same unconditional guarantee. If the population identified set is $I+[a,b]$, add $[a,b]$ to the sampling interval. A positive lower endpoint then certifies improvement with error probability at most $\delta$.
 
+\section{Simultaneous Certification after Policy Search}
+
+Let $\pi_1,\ldots,\pi_K$ be fixed before the certification sample is observed, and let $\Delta_k=V^{\pi_k}-V^{\pi_0}$. For each $k$, suppose $Y_{1k},\ldots,Y_{nk}$ are episode contributions evaluated on the same $n$ independent episodes. The vectors $(Y_{i1},\ldots,Y_{iK})$ may be arbitrarily dependent within episode $i$; only independence across episodes is needed. Conditional on an independent nuisance-training sample, assume $\bbE[Y_{ik}]=\Delta_k$ and the deterministic range of candidate $k$ is at most $B_k$.
+
+\begin{theorem}[Simultaneous empirical-Bernstein certificate]
+\label{thm:supplibrary}
+Let $S_k^2$ be the sample variance of $Y_{1k},\ldots,Y_{nk}$ and define
+\[
+r_{k,n}=\sqrt{\frac{2S_k^2\log(4K/\delta)}{n}}
++\frac{7B_k\log(4K/\delta)}{3(n-1)}.
+\]
+Then, with probability at least $1-\delta$,
+\[
+|\bar Y_k-\Delta_k|\le r_{k,n}
+\qquad\text{for all }k=1,\ldots,K.
+\]
+Consequently, if $\widehat k\in\arg\max_k(\bar Y_k-r_{k,n})$ and the rule deploys only when $\bar Y_{\widehat k}-r_{\widehat k,n}>0$, then
+\[
+\bbP\!\left(
+\text{the rule deploys and }\Delta_{\widehat k}\le0
+\right)\le\delta.
+\]
+If the contribution for candidate $k$ estimates an identified component $\theta_k$ and the remaining population ambiguity is $u_k\in[a_k,b_k]$, the same statement holds after replacing its lower bound by $\bar Y_k-r_{k,n}+a_k$.
+\end{theorem}
+
+\begin{proof}
+Condition on the nuisance-training sample. Apply the fixed-pair empirical-Bernstein proposition to candidate $k$ with failure probability $\delta/K$. A union bound gives simultaneous coverage. On this event, every deployed candidate satisfies
+$\Delta_{\widehat k}\ge \bar Y_{\widehat k}-r_{\widehat k,n}>0$,
+which proves family-wise safety. For partial identification,
+$\Delta_k=\theta_k+u_k\ge\bar Y_k-r_{k,n}+a_k$
+on the same event. Finally integrate over the nuisance-training sample; exact conditional unbiasedness ensures that no additional failure term appears.
+\end{proof}
+
+The theorem allows all candidates to share one certification sample and does not require independence across candidates. It also clarifies the required order of operations: multiplicity correction precedes maximization. Maximizing point estimates or pointwise lower bounds first and then treating the selected policy as fixed does not inherit a fixed-pair guarantee.
+
+\begin{proposition}[Certification complexity]
+\label{prop:librarycomplexity}
+Suppose a candidate has improvement $\Delta_k>0$, contribution variance at most $\sigma_k^2$, and $|Y_{ik}-\Delta_k|\le B_k$. Let $L=\log(K/\delta)$. The standard one-sided Bernstein lower bound certifies candidate $k$ with probability at least $1-\delta/K$ whenever
+\[
+n\ge
+\left(
+\frac{32\sigma_k^2}{\Delta_k^2}
++\frac{8B_k}{3\Delta_k}
+\right)L.
+\]
+Thus the sufficient sample size is
+$O\{(\sigma_k^2/\Delta_k^2+B_k/\Delta_k)\log(K/\delta)\}$.
+\end{proposition}
+
+\begin{proof}
+A valid one-sided Bernstein radius is
+\[
+r_k=\sqrt{\frac{2\sigma_k^2L}{n}}+\frac{2B_kL}{3n}.
+\]
+The displayed sample size makes each summand at most $\Delta_k/4$, so $r_k\le\Delta_k/2$. With probability at least $1-e^{-L}=1-\delta/K$, Bernstein's inequality gives $\bar Y_k\ge\Delta_k-r_k$. On this event the lower confidence endpoint obeys
+$\bar Y_k-r_k\ge\Delta_k-2r_k\ge0$.
+A union bound yields the family-wise interpretation.
+\end{proof}
+
+By Theorem~\ref{thm:suppvariance}, signed PDIS has
+$\sigma_k^2=\mathcal V_{{\rm eff},k}+\mathcal V_{{\rm action},k}$,
+whereas oracle CA-PDIS has variance $\mathcal V_{{\rm eff},k}$. When action-composition noise dominates, the two procedures pay the same logarithmic search penalty but CA-PDIS can require substantially fewer certification episodes.

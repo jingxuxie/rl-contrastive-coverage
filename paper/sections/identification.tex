@@ -29,6 +29,15 @@ dP_{M,t}^\pi-dP_{M,t}^{\pi_0}
 \]
 On logger-null policy paths, \UCC makes the signed target-baseline factor zero. Integrating the conditional reward gives Eq.~\eqref{eq:signedpdis}. Conversely, if Eq.~\eqref{eq:ucc} fails at $z_t$, construct a deterministic history-tree environment that reaches $z_t$ whenever its action sequence is chosen. Two environments assigning reward zero versus one only at $z_t$ generate the same logged distribution because $L_t^\beta(z_t)=0$, but their policy contrasts differ by $\gamma^{t-1}(L_t^\pi-L_t^{\pi_0})(z_t)$. Hence no functional of the logged law can identify the contrast. Full proofs appear in the supplement.
 
+\paragraph{Why the condition is uniform.}
+For a fixed environment transition law $G$, let $\mu_{G,t}=P_{G,t}^{\beta}$ be the logger prefix measure and let $\nu_{G,t}=P_{G,t}^{\pi}-P_{G,t}^{\pi_0}$ be the signed contrast measure. The population comparison is identified for arbitrary bounded reward kernels exactly when $\nu_{G,t}\ll\mu_{G,t}$ at every stage. In that case, the Radon--Nikodym derivative $d\nu_{G,t}/d\mu_{G,t}$ is the instance-specific signed weight. This condition can be weaker than \UCC when the environment makes some formal histories impossible, but it depends on off-support transition structure that the log generally cannot reveal. \UCC is precisely the policy-only condition that guarantees signed domination for \emph{every} compatible transition law. Thus the theorem separates an exact instance condition from a robust, externally checkable condition.
+
+\begin{proposition}[Coverage of the estimand]
+\label{prop:instance}
+Conditional on a fixed initial and transition law $G$, and allowing arbitrary rewards in $[0,1]$, $V^\pi-V^{\pi_0}$ is identified from the population logged law if and only if $\nu_{G,t}\ll\mu_{G,t}$ for all $t$. Uniform contrastive coverage is necessary and sufficient for this domination to hold for every $G$.
+\end{proposition}
+The proposition makes the central message literal: coverage attaches to the signed measure integrated by the estimand. The supplement gives the measure-theoretic proof and explains why the instance condition is generally not testable from finite logger data.
+
 \begin{corollary}[Shared unsupported controller]
 Suppose the candidate and baseline are episode-level mixtures
 $\pi=q\kappa+(1-q)\widetilde\pi$ and

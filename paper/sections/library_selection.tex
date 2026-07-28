@@ -1,0 +1,55 @@
+\section{Safe Search over a Policy Library}
+
+The preceding results concern one fixed candidate--baseline pair. In practice, an analyst may train many candidates and report the one with the largest estimated improvement. Even when every fixed-pair interval is valid, this search can invalidate the final claim. Contrastive coverage separates the problem into two stages: first determine which comparisons are structurally identifiable, then correct the statistical certificate for the number of comparisons actually searched.
+
+Let $\Pi=\{\pi_1,\ldots,\pi_K\}$ be fixed independently of a certification sample, with common baseline $\pi_0$. Proposition~\ref{prop:classes} first partitions the library by off-support signature. We retain candidates in the baseline's class, or attach the sharp ambiguity correction from Theorem~\ref{thm:sharp} to candidates outside it. For candidate $k$, let $Y_{ik}$ be either its signed-PDIS contribution or a CA-PDIS contribution whose nuisance model was fitted on independent data. Write $\Delta_k=V^{\pi_k}-V^{\pi_0}$, $\bar Y_k=n^{-1}\sum_iY_{ik}$, sample variance $S_k^2$, and deterministic range bound $B_k$. Define
+\begin{equation}
+ r_{k,n}^{\rm sim}(\delta)=
+ \sqrt{\frac{2S_k^2\log(4K/\delta)}{n}}
+ +\frac{7B_k\log(4K/\delta)}{3(n-1)},
+\label{eq:simradius}
+\end{equation}
+and $L_k=\bar Y_k-r_{k,n}^{\rm sim}(\delta)$.
+
+\begin{theorem}[Simultaneous contrastive selection]
+\label{thm:library}
+Suppose each candidate satisfies \UCC with the baseline and each $Y_{ik}$ is conditionally unbiased given an independent nuisance-training sample. Then, with probability at least $1-\delta$, $\Delta_k\ge L_k$ simultaneously for every $k\le K$. Hence the rule
+\[
+\widehat k\in\arg\max_{k\le K}L_k,
+\qquad
+\text{deploy }\pi_{\widehat k}\text{ only if }L_{\widehat k}>0,
+\]
+has family-wise false-improvement probability at most $\delta$. If candidate $k$ instead has sharp population ambiguity $[a_k,b_k]$ around its identified component, replacing $L_k$ by $L_k+a_k$ gives the corresponding uniformly valid rule.
+\end{theorem}
+
+The proof is a union bound over the fixed-pair empirical-Bernstein events, but the consequence is important: \emph{selection occurs after constructing simultaneous lower bounds}, rather than by first maximizing noisy point estimates and then attaching a single-policy interval. Correlation among candidate contributions is automatically preserved because every $Y_{ik}$ is evaluated on the same episode. More refined max-statistic or betting bounds could exploit that correlation further; Theorem~\ref{thm:library} is deliberately simple and finite-sample valid.
+
+A standard Bernstein inversion shows the role of efficient contrast estimation. Up to constants, a candidate with gap $\Delta_k>0$, variance at most $\sigma_k^2$, and range $B_k$ is certifiable once
+\begin{equation}
+ n\gtrsim
+ \left(\frac{\sigma_k^2}{\Delta_k^2}+\frac{B_k}{\Delta_k}\right)
+ \log\frac{K}{\delta}.
+\label{eq:librarycomplexity}
+\end{equation}
+For signed PDIS, Theorem~\ref{thm:efficiency} decomposes $\sigma_k^2$ into the efficiency bound plus action-composition noise; oracle CA-PDIS removes the latter. Thus contrastive augmentation improves the power of safe search without changing its multiplicity guarantee.
+
+\paragraph{Recommended workflow.}
+A deployment pipeline can therefore: (i) compute off-support signatures and keep the baseline's identifiable class; (ii) train continuation models using a search split; (iii) evaluate every candidate on one untouched certification split and construct Eq.~\eqref{eq:simradius}; and (iv) deploy the largest positive lower bound, otherwise abstain. This prevents both structural extrapolation and statistical over-searching.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3.2pt}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Method & False deploy & Safe power \\
+\midrule
+Pointwise Wald & .927 & --- \\
+Bonferroni Wald & .027 & .957 \\
+Simultaneous PDIS--EB & .000 & .143 \\
+Simultaneous CA-PDIS--EB & .000 & .897 \\
+\bottomrule
+\end{tabular}
+\caption{Policy-library experiment: global-null error at $K=100$ and safe-certification power at $K=50,n=6000$ (300 repetitions). Wald methods are diagnostic; EB methods are finite-sample valid.}
+\label{tab:librarymain}
+\end{table}

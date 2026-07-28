@@ -1,15 +1,13 @@
 \section{Finite-Sample Certification}
 
-Under \UCC, define the signed per-decision contribution for logged episode $i$,
+Under \UCC, define the signed per-decision contribution
 \begin{equation}
-Y_i=\sum_{t=1}^H\gamma^{t-1}
-W_t^\Delta(Z_{i,t})R_{i,t},
-\qquad
-\widehat\Delta=\frac1n\sum_{i=1}^nY_i.
+Y_{\rm PDIS}=\sum_{t=1}^H\gamma^{t-1}
+W_t^\Delta(Z_t)R_t.
 \end{equation}
-Unlike subtracting two independently bounded estimates, the subtraction occurs inside every episode and preserves covariance and support cancellation.
+Unlike subtracting two independently bounded estimates, the subtraction occurs inside every episode and preserves both covariance and support cancellation.
 
-Assume a deterministic range bound $\max Y_i-\min Y_i\le B$ and let $S_n^2$ be the sample variance. A two-sided empirical-Bernstein radius is
+More generally, let $Y$ be any episode contribution with $\bbE_\beta Y=\DeltaV$, deterministic range at most $B$, and sample variance $S_n^2$. Define
 \begin{equation}
 r_n(\delta)=
 \sqrt{\frac{2S_n^2\log(4/\delta)}{n}}
@@ -19,61 +17,78 @@ r_n(\delta)=
 
 \begin{proposition}[Deployment certificate]
 \label{prop:certificate}
-Under the assumptions of Theorem~\ref{thm:identification}, with probability at least $1-\delta$,
-$|\widehat\Delta-\DeltaV|\le r_n(\delta)$.
+With probability at least $1-\delta$,
+$|n^{-1}\sum_iY_i-\DeltaV|\le r_n(\delta)$.
 Consequently, deploying $\pi$ only when
-$\widehat\Delta-r_n(\delta)>0$ has false-improvement probability at most $\delta$.
-When Theorem~\ref{thm:sharp} leaves a population ambiguity interval $[a,b]$ around the supported contrast, adding $[a,b]$ to the sampling interval remains valid.
+$n^{-1}\sum_iY_i-r_n(\delta)>0$ has false-improvement probability at most $\delta$. If Theorem~\ref{thm:sharp} leaves population ambiguity $[a,b]$ around the identified component, adding $[a,b]$ to the sampling interval remains valid.
 \end{proposition}
+
+This proposition applies to signed PDIS directly and, conditional on an independent nuisance-training split, to the augmented contribution introduced next. Thus efficiency improvements can translate into stronger certificates without weakening finite-sample validity.
+
+\section{Efficient Contrast Estimation Without Separate Values}
+
+Write $\omega_t=W_t^\Delta$ and set $v_{H+1}^\Delta=0$. Define the \emph{contrastive Bellman recursion} entirely under the logged law:
+\begin{align}
+q_t^\Delta(z_t)
+&=\bbE_\beta[\omega_tR_t+\gamma v_{t+1}^\Delta(H_{t+1})\mid Z_t=z_t],
+\label{eq:contrastq}\\
+v_t^\Delta(h_t)
+&=\bbE_{A_t\sim\beta_t(\cdot\mid h_t)}[q_t^\Delta(h_t,A_t)].
+\label{eq:contrastv}
+\end{align}
+Repeated conditioning gives $\DeltaV=\bbE_\beta[v_1^\Delta(H_1)]$. Crucially, $q_t^\Delta$ and $v_t^\Delta$ are logged-law objects. They can be identified under \UCC even when the candidate and baseline value functions are not separately identified.
+
+For arbitrary fitted functions $\widetilde q_t$, define their known-logger action averages
+$\widetilde v_t(h_t)=\bbE_{A_t\sim\beta_t}[\widetilde q_t(h_t,A_t)]$
+and $\widetilde v_{H+1}=0$. The \emph{contrastive augmented PDIS} contribution is
+\begin{equation}
+\begin{aligned}
+Y_{\rm CA}(\widetilde q)
+&=\widetilde v_1(H_1)+\sum_{t=1}^H\gamma^{t-1}\bigl\{\omega_tR_t\\
+&\qquad+\gamma\widetilde v_{t+1}(H_{t+1})-\widetilde q_t(Z_t)\bigr\}.
+\end{aligned}
+\label{eq:capdis}
+\end{equation}
+
+\begin{theorem}[Contrastive augmentation and efficiency]
+\label{thm:efficiency}
+Assume \UCC and known $\beta$.
+For every fixed $\widetilde q$, $\bbE_\beta Y_{\rm CA}(\widetilde q)=\DeltaV$; hence the same holds conditionally for a nuisance model fitted on independent data. At the oracle recursion $q^\Delta$, $Y_{\rm CA}(q^\Delta)-\DeltaV$ is the efficient influence function in the nonparametric sequential model with known logging mechanism. Writing $\mathcal V_{\rm eff}=\operatorname{Var}_\beta\{Y_{\rm CA}(q^\Delta)\}$ and
+\[
+e_t=(\widetilde q_t-q_t^\Delta)-(\widetilde v_t-v_t^\Delta),
+\]
+we have the exact identity
+\begin{equation}
+\operatorname{Var}_\beta\{Y_{\rm CA}(\widetilde q)\}
+=\mathcal V_{\rm eff}+
+\sum_{t=1}^H\gamma^{2(t-1)}\bbE_\beta[e_t^2].
+\label{eq:generalvariance}
+\end{equation}
+In particular, setting $\widetilde q=0$ yields
+\begin{equation}
+\operatorname{Var}_\beta(Y_{\rm PDIS})
+=\mathcal V_{\rm eff}+
+\sum_{t=1}^H\gamma^{2(t-1)}
+\bbE_\beta[(q_t^\Delta-v_t^\Delta)^2].
+\label{eq:pdisvariance}
+\end{equation}
+\end{theorem}
+With a fixed number of folds, the supplement further proves that cross-fitted CA-PDIS is asymptotically efficient whenever its action-centered continuation error converges to zero in $L_2$; unlike ordinary doubly robust remainders, no product-rate condition is needed.
+
+The second term in Eq.~\eqref{eq:pdisvariance} is pure \emph{action-composition noise}: it arises because the known logger randomly chooses actions. The augmentation removes exactly this orthogonal component. With individually covered policies, Eq.~\eqref{eq:capdis} reduces to the difference of familiar sequential doubly robust estimators. Under contrastive coverage alone, the direct recursion remains defined while those two separate estimators need not be.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=.485\textwidth]{../results/figures/bandit_certificate.pdf}\hfill
 \includegraphics[width=.485\textwidth]{../results/figures/sequential_certificate.pdf}
-\caption{\textbf{Finite-sample certification.} Empirical coverage and probability that the lower confidence bound is positive. Dashed lines show nominal 95\% coverage.}
+\caption{\textbf{Finite-sample certification.} Left: signed bandit intervals are conservative and eventually certify improvement. Right: on the same untouched certification split, learned CA-PDIS certifies all 500 positive-improvement repetitions at 1,000 total episodes, while signed PDIS certifies one; both maintain at least nominal coverage.}
 \label{fig:certificate}
 \end{figure*}
-
-The leading term depends on
-$\operatorname{Var}_\beta(Y)$, a \emph{contrastive complexity}. Since
-$Y=Y^\pi-Y^{\pi_0}$,
-its variance contains the favorable term
-$-2\operatorname{Cov}(Y^\pi,Y^{\pi_0})$ emphasized by pairwise OPE \citep{jeunen2024delta}. Our identification result is orthogonal: $Y$ may be well-defined even when neither separate importance-weight estimator is.
-
-\section{Identification Is Not Yet Efficiency}
-
-Once the contrast is identified, signed IPS is the simplest unbiased estimator, but it need not be statistically efficient. The one-step case makes the distinction exact. Let $d_a=\pi(a)-\pi_0(a)$, $A\sim\beta$, $\mu_a=\bbE[R\mid A=a]$, and $\sigma_a^2=\operatorname{Var}(R\mid A=a)$. Under contrastive coverage, $d_a=0$ whenever $\beta_a=0$.
-
-\begin{proposition}[Bandit efficiency]
-\label{prop:efficiency}
-In the nonparametric finite-action bandit with known $\beta$, the efficient influence function for $\Delta=\sum_a d_a\mu_a$ is
-\begin{equation}
-\phi(A,R)=\frac{d_A}{\beta_A}(R-\mu_A),
-\end{equation}
-and the per-observation efficiency bound is
-\begin{equation}
-\mathcal V_{\rm eff}=\sum_{a:\beta_a>0}
-\frac{d_a^2\sigma_a^2}{\beta_a}.
-\label{eq:effbound}
-\end{equation}
-The stratified estimator $\widehat\Delta_{\rm strat}=\sum_a d_a\overline R_a$ attains this bound asymptotically. By contrast, signed IPS has variance
-\begin{align}
-\mathcal V_{\rm IPS}
-&=\sum_a\frac{d_a^2\bbE[R^2\mid a]}{\beta_a}-\Delta^2\\
-&=\mathcal V_{\rm eff}+
-\operatorname{Var}_{A\sim\beta}\!\left(\frac{d_A\mu_A}{\beta_A}\right)
-\ge \mathcal V_{\rm eff}.
-\label{eq:ipsdecomp}
-\end{align}
-\end{proposition}
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=.485\textwidth]{../results/figures/random_bandit_width_ratio.pdf}\hfill
-\includegraphics[width=.485\textwidth]{../results/figures/bandit_efficiency.pdf}
-\caption{\textbf{Stress testing and efficiency.} (a) Joint identification is often much sharper than subtracting separate bounds. (b) After identification, stratification attains the bandit efficiency bound and improves over signed IPS.}
+\includegraphics[width=.485\textwidth]{../results/figures/sequential_efficiency.pdf}
+\caption{\textbf{Identification and estimation gains.} Left: separate-value bounds are often far wider than the sharp contrastive interval. Right: the exact signed-PDIS/efficiency variance ratio grows rapidly with horizon; Eq.~\eqref{eq:pdisvariance} holds to machine precision.}
 \label{fig:stress}
 \end{figure*}
-
-Thus contrastive coverage solves an identification problem; standard augmentation or outcome regression can still remove avoidable action-composition noise. Equation~\eqref{eq:ipsdecomp} also suggests a sequential research program: combine signed path ratios with marginalized or doubly robust estimators \citep{jiang2016doubly,uehara2020minimax,kallus2020double}. We keep the finite-sample deployment guarantee on the transparent signed-PDIS estimator and use the bandit result to show that this choice is conservative rather than claimed optimal.
-

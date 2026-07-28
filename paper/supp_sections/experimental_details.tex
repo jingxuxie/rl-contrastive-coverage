@@ -1,4 +1,55 @@
 \section{Experimental Details}
 
-All scripts are in \texttt{experiments/run\_all.py}; the seed is 20260726. Bandit population experiments vary common unsupported mass $q\in\{.1,.25,.4,.55,.7\}$ and mismatch $\epsilon$. The finite-sample experiment uses $q=.45$, true contrast $.198$, 1,000 repetitions, and sample sizes from 100 to 5,000. The sequential chain has horizon five, supported per-step reward means $.75$ and $.25$, logger good-action probability $.5$, target/baseline good-action probabilities $.7/.3$, common weight $.4$, and true contrast $.6$. It uses 600 repetitions per sample size. A deterministic binary tree verifies the exact width identity over mismatches from zero to $.2$. Finally, 5,000 randomly generated finite-action bandits stress-test the one-step identity.
+All scripts are launched by \texttt{experiments/run\_all.py}; the fixed seed is 20260726. Every environment is tabular, and all plotted quantities are either exact finite sums or averages over independent Monte Carlo repetitions.
 
+\paragraph{Identification experiments.}
+Bandit population experiments vary common unsupported mass
+$q\in\{.1,.25,.4,.55,.7\}$ and mismatch $\epsilon$. The finite-sample bandit certificate uses $q=.45$, true contrast $.198$, 1,000 repetitions, and sample sizes from 100 to 5,000. The five-step shared-branch construction has supported reward means $.75/.25$, logging good-action probability $.5$, target/baseline good-action probabilities $.7/.3$, common weight $.4$, and true contrast $.6$. A deterministic binary history tree independently verifies the exact sharp-width identity over mismatches from zero to $.2$. We also generate 5,000 random ten-action bandits with between two and nine logger-supported actions.
+
+\paragraph{Sequential variance decomposition.}
+For each $H=1,\ldots,16$, we enumerate all $2^H$ logger action strings. Conditional Bernoulli reward means are integrated analytically, so the PDIS variance, efficient variance, and action-composition variance contain no Monte Carlo error. Parameters are logging probability $.5$, reward means $.7/.3$, common weight $.35$, and target/baseline good-action probabilities $.65/.35$. The maximum residual in
+$\operatorname{Var}(Y_{\rm PDIS})-\mathcal V_{\rm eff}-\mathcal V_{\rm action}$
+is $2.13\times10^{-14}$.
+
+\paragraph{Cross-fitted CA-PDIS.}
+The eight-step chain uses the same probabilities. The nuisance class assumes stationary action-reward means and therefore estimates only two scalars by pooling stages. Two-fold cross-fitting ensures that every episode is evaluated using a model trained without that episode. Repetition counts decrease from 1,200 at $n=50$ to 500 at $n=2{,}000$. Figure~\ref{fig:suppcrossfit} reports $n$ times MSE for signed PDIS, learned CA-PDIS, and oracle CA-PDIS together with the exact asymptotic constants.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=.9\linewidth]{../results/figures/sequential_crossfit_mse.pdf}
+\caption{Two-fold learned CA-PDIS approaches the exact semiparametric efficiency bound and remains nearly indistinguishable from oracle augmentation.}
+\label{fig:suppcrossfit}
+\end{figure}
+
+\paragraph{Stochastic tabular validation.}
+To test beyond the independent-chain construction, we generate a six-step process with five states, two logged actions, Bernoulli rewards, and transition rows drawn once from Dirichlet distributions. The target favors the higher-reward action in each state and stage, while the baseline favors the other action; the logger is uniform. Before the logged process, both policies select the same unobserved controller with probability $.25$, which makes both absolute values unidentified but cancels from their difference. A smoothed tabular reward-transition model is fitted on the opposite fold, then combined as $\widehat W_t^\pi\widehat Q_t^\pi-\widehat W_t^{\pi_0}\widehat Q_t^{\pi_0}$ to evaluate the direct contrastive continuation. Figure~\ref{fig:suppstochastic} reports $n$ times MSE over 1,000 to 250 repetitions as $n$ grows from 250 to 5,000. At the largest size, learned CA-PDIS is within $.8\%$ of oracle MSE, improves over PDIS by $7.59\times$, and has bias $-2.12\times10^{-3}$.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=.9\linewidth]{../results/figures/stochastic_tabular_crossfit_mse.pdf}
+\caption{The variance reduction persists in a stochastic finite-state MDP whose two target policies share an unobserved initial branch.}
+\label{fig:suppstochastic}
+\end{figure}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=.94\textwidth]{../results/figures/policy_library_selection.pdf}
+\caption{Searching a fixed policy library. Left: uncorrected pointwise inference fails increasingly often under the global null as the library grows. Right: after simultaneous correction, contrastive augmentation substantially improves safe-certification power.}
+\label{fig:supplibrary}
+\end{figure*}
+
+\paragraph{Split-sample certification.}
+The certificate uses an eight-step chain with reward means $.7/.3$, common weight $.35$, and target/baseline good-action probabilities $.60/.40$, giving true contrast $.416$. Each dataset is randomly divided in half. The first half fits the two pooled reward means; the second half evaluates both signed PDIS and CA-PDIS. For each fitted nuisance, we enumerate all $2^8$ action strings and optimize over binary rewards to compute the exact deterministic contribution range. We use 500 repetitions at total sample sizes 200, 500, 1,000, 2,000, and 5,000. At 1,000 episodes, the mean interval widths are $1.410$ for PDIS and $.649$ for CA-PDIS; certification rates are $.002$ and $1.0$, while both empirical coverages equal one.
+
+\paragraph{Metrics, uncertainty, and computing environment.}
+The primary metrics are identified-set width, confidence-interval coverage, probability of certifying a truly positive contrast, exact per-episode variance, and mean squared error. These correspond directly to the identification, safety, and efficiency claims. Monte Carlo results report all repetition counts; CSV files also contain Monte Carlo standard errors. At the largest chain and stochastic-MDP settings, the paired PDIS-minus-CA-PDIS squared-error gains are $14.3$ and $10.7$ Monte Carlo standard errors above zero, respectively. No hyperparameter was selected using evaluation returns: grids, process parameters, nuisance pseudo-counts, and repetition counts are fixed in the scripts. Random experiments use a master seed 20260726 and independently spawned child streams, so adding one experiment does not change another's results.
+
+Experiments were run without a GPU on Debian GNU/Linux 13 using five virtual AMD EPYC 9V74 CPU cores and 5.9 GiB RAM. The software environment was Python 3.13.5, NumPy 2.3.5, SciPy 1.17.0, pandas 2.2.3, and Matplotlib 3.10.8. A clean execution of all tests and experiments takes under one minute in this environment; LaTeX compilation is separate.
+
+
+\paragraph{Policy-library search experiment.}
+The logger chooses uniformly among 20 supported actions and never chooses a twenty-first action. The baseline assigns mass $.35$ to the logger-null action and spreads the remaining mass uniformly. We create a fixed library of 100 candidates; every candidate assigns the same $.35$ mass to the null action, so the entire library belongs to the baseline's contrastive-coverage class. Supported candidate probabilities are fixed Dirichlet draws, except for one candidate deliberately tilted toward actions with larger reward means. Each dataset is split equally. The training half fits 20 Bernoulli means with a fixed Beta$(1,1)$ smoothing rule; the evaluation half computes signed-PDIS and CA-PDIS contributions for every candidate. For each fitted model and candidate, the deterministic CA-PDIS range is obtained exactly by enumerating the supported action and the two binary reward endpoints.
+
+Under the global null, all supported reward means equal $.5$. We vary the searched library size over $K\in\{1,5,20,50,100\}$ using 300 repetitions at 4,000 total episodes. The diagnostic pointwise Wald rule applies a one-sided $5\%$ interval to every candidate without correcting selection. The Bonferroni Wald baseline uses level $.05/K$. Our two guaranteed methods apply Theorem~\ref{thm:supplibrary} to signed PDIS and CA-PDIS. In the alternative regime, supported means increase linearly from $.4$ to $.6$, the first candidate is genuinely better than the baseline, $K=50$, and total sample size ranges from 1,000 to 8,000.
+
+The experiment is intentionally not an algorithm-training benchmark. It isolates two orthogonal failure modes. First, pointwise post-selection inference becomes severely anti-conservative as $K$ grows. Second, once multiplicity is handled, the action-composition term in signed PDIS can still make a valid rule nearly powerless. CA-PDIS targets the second problem while the simultaneous correction targets the first.
